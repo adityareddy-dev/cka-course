@@ -84,7 +84,7 @@ const KEY="cka_course_v1";
 const PASS=85;
 const M=[
 {id:"m1",name:"1 · kubectl Fluency and Workloads",w:15,days:"Days 1 to 6",
-topics:"Pods, Deployments, scaling, rollouts, namespaces, labels, dry-run YAML, probes, requests and limits, taints, nodeSelector, DaemonSets, static pods, Jobs",
+topics:"Pods, Deployments, scaling, rollouts, namespaces, labels, dry-run YAML, probes, requests and limits, taints, nodeSelector, node affinity, PriorityClass, DaemonSets, static pods, Jobs, ConfigMaps and Secrets, HPA autoscaling",
 cards:[
 ["Run an nginx pod imperatively","kubectl run nginx --image=nginx"],
 ["Generate deployment YAML without creating it","kubectl create deploy web --image=nginx --dry-run=client -o yaml"],
@@ -93,7 +93,13 @@ cards:[
 ["Follow logs of a pod","kubectl logs -f web"],
 ["Set default namespace for current context","kubectl config set-context --current --namespace=dev"],
 ["Roll back a deployment","kubectl rollout undo deploy/web"],
-["Where do static pod manifests live","/etc/kubernetes/manifests"]],
+["Where do static pod manifests live","/etc/kubernetes/manifests"],
+["Create a ConfigMap from literals","kubectl create configmap app-cfg --from-literal=MODE=prod"],
+["Create a generic Secret imperatively","kubectl create secret generic db --from-literal=pass=x"],
+["Autoscale deploy web 2 to 10 pods at 70 percent CPU","kubectl autoscale deploy web --min=2 --max=10 --cpu-percent=70"],
+["VPA changes","pod requests and limits, HPA changes replica count"],
+["Hard node affinity rule","requiredDuringSchedulingIgnoredDuringExecution"],
+["Make pods schedule ahead of others","PriorityClass plus priorityClassName in the pod spec"]],
 quiz:[
 ["You need deployment YAML on disk without creating anything. Which command?",["kubectl get deploy web -o yaml","kubectl create deploy web --image=nginx --dry-run=client -o yaml","kubectl apply deploy web --image=nginx","kubectl run deploy web --image=nginx -o yaml"],1,"dry-run=client -o yaml generates without creating"],
 ["Which controller guarantees exactly one pod per node?",["ReplicaSet","StatefulSet","DaemonSet","Job"],2,"DaemonSets schedule one pod on every node"],
@@ -104,9 +110,15 @@ quiz:[
 ["Scale deploy web to 5 replicas imperatively",["kubectl scale deploy web --replicas=5","kubectl resize deploy web 5","kubectl set replicas web 5","kubectl edit rs web"],0,"scale is the imperative verb"],
 ["Undo the last deployment rollout",["kubectl rollout undo deploy/web","kubectl rollback deploy/web","kubectl undo deploy/web","kubectl rollout revert web"],0,"rollout undo reverts to previous revision"],
 ["Static pods are managed by",["kube-scheduler","the kubelet on that node","controller-manager","kubectl"],1,"kubelet watches the manifests directory"],
-["Interactive shell into container app in pod web",["kubectl attach web","kubectl exec -it web -c app -- sh","kubectl ssh web","kubectl run -it web sh"],1,"exec -it with container flag"]]},
+["Interactive shell into container app in pod web",["kubectl attach web","kubectl exec -it web -c app -- sh","kubectl ssh web","kubectl run -it web sh"],1,"exec -it with container flag"],
+["kubectl get secret db -o yaml shows values that are",["encrypted with the cluster CA","hashed","plain text","base64 encoded"],3,"base64 is encoding, not encryption"],
+["Load every key of ConfigMap app-cfg as env vars",["valueFrom configMapKeyRef per key","envFrom with configMapRef","a configMap volume only","an initContainer"],1,"envFrom imports the whole ConfigMap at once"],
+["HPA shows unknown for CPU utilization. Common cause?",["CPU requests missing on the pods","too many replicas","wrong ServiceAccount","the HPA needs a restart"],0,"Utilization is a percent of requests, so requests must be set"],
+["Autoscale deploy web between 2 and 10 replicas at 70 percent CPU",["kubectl scale deploy web --min=2 --max=10","kubectl hpa deploy web --cpu=70","kubectl autoscale deploy web --min=2 --max=10 --cpu-percent=70","kubectl set autoscale web 2 10 70"],2,"autoscale creates the HPA imperatively"],
+["Node affinity rule that keeps the pod Pending until a label matches",["preferredDuringSchedulingIgnoredDuringExecution","requiredDuringSchedulingIgnoredDuringExecution","requiredDuringExecution","weight 100"],1,"required is the hard rule, preferred is best effort"],
+["Which lets a critical pod preempt others when the cluster is full?",["QoS class Guaranteed","resource limits","a PodDisruptionBudget","a higher PriorityClass"],3,"Higher priority pods can evict lower ones to schedule"]]},
 {id:"m2",name:"2 · Cluster Architecture, kubeadm, RBAC",w:25,days:"Days 7 to 12",
-topics:"Control plane anatomy, kubeadm init and join, upgrades, drain and cordon, etcd backup and restore, RBAC, ServiceAccounts, kubeconfig, Helm, Kustomize",
+topics:"Control plane anatomy, node prep, kubeadm init and join, upgrades, HA control planes, drain and cordon, etcd backup and restore, RBAC, ServiceAccounts, kubeconfig, Helm, Kustomize, CRDs and operators, CNI CSI CRI",
 cards:[
 ["Control plane components","kube-apiserver, etcd, kube-scheduler, kube-controller-manager"],
 ["Node components","kubelet, kube-proxy, container runtime"],
@@ -115,7 +127,17 @@ cards:[
 ["Safely empty a node for maintenance","kubectl drain node1 --ignore-daemonsets"],
 ["Bring a drained node back","kubectl uncordon node1"],
 ["Grant read-only pods in one namespace","Role + RoleBinding"],
-["Check what a user can do","kubectl auth can-i list pods --as bob"]],
+["Check what a user can do","kubectl auth can-i list pods --as bob"],
+["List CRDs in the cluster","kubectl get crd"],
+["Operator pattern","custom controller plus CRDs that manage an app lifecycle"],
+["Add a second control plane node","kubeadm join --control-plane --certificate-key on the new node"],
+["Stacked vs external etcd","etcd colocated on control plane nodes vs its own machines"],
+["CNI, CSI, CRI","plugin interfaces for networking, storage, runtimes"],
+["kubelet to containerd protocol","the CRI"],
+["Override chart values at install","helm install myrel repo/chart --set key=value or -f values.yaml"],
+["Kustomize overlay","a kustomization.yaml that patches a shared base per environment"],
+["Node prep before kubeadm init","disable swap, load br_netfilter, set ip_forward to 1, install a runtime"],
+["Port the API server listens on","6443"]],
 quiz:[
 ["Which component stores all cluster state?",["kube-apiserver","etcd","controller-manager","kubelet"],1,"etcd is the cluster database"],
 ["Which component assigns pods to nodes?",["kube-proxy","kube-scheduler","kubelet","apiserver"],1,"The scheduler binds pods to nodes"],
@@ -126,7 +148,17 @@ quiz:[
 ["The kubelet runs as",["a static pod","a systemd service on the node","a DaemonSet","part of apiserver"],1,"kubelet is the node agent under systemd"],
 ["Restore etcd from snapshot, then",["restart kubectl","point etcd to the restored data dir","delete all pods","re-run kubeadm init"],1,"etcd must use the restored data directory"],
 ["Install a chart with Helm",["helm apply repo/chart","helm install myrel repo/chart","helm create repo/chart","helm run chart"],1,"helm install release chart"],
-["Apply a kustomize directory",["kubectl apply -k dir/","kubectl kustomize apply dir/","kubectl apply -f -k dir/","kustomize install dir/"],0,"kubectl apply -k handles kustomizations"]]},
+["Apply a kustomize directory",["kubectl apply -k dir/","kubectl kustomize apply dir/","kubectl apply -f -k dir/","kustomize install dir/"],0,"kubectl apply -k handles kustomizations"],
+["kubectl get backups says the server has no such resource type. First check?",["kubectl get crd","kubectl get pods -A","restart the apiserver","reinstall kubectl"],0,"Custom resources need their CRD installed first"],
+["An operator is best described as",["a Helm chart","a scheduler extension","a controller plus CRDs managing an app","a kubelet plugin"],2,"Operators encode app lifecycle in a custom controller"],
+["HA kubeadm clusters point kubelets and users at",["the IP of node1","etcd directly","CoreDNS","a load balanced control-plane endpoint"],3,"init --control-plane-endpoint fronts all API servers"],
+["Smallest etcd cluster that survives losing one member?",["1","2","3","4"],2,"3 members keep quorum with one down"],
+["Which interface do storage drivers implement?",["CNI","CSI","CRI","OCI"],1,"CSI is the Container Storage Interface"],
+["The kubelet launches containers by calling",["the CRI on a runtime like containerd","the Docker socket directly","kube-proxy","the CNI"],0,"CRI is the kubelet to runtime interface"],
+["Return release myrel to revision 1",["helm undo myrel","helm revert myrel 1","helm upgrade myrel --to=1","helm rollback myrel 1"],3,"helm rollback release revision"],
+["See what a kustomization renders without applying",["kubectl kustomize dir/","kubectl diff -k dir/ --render","kustomize print dir/","kubectl get -k dir/"],0,"kubectl kustomize prints the built manifests"],
+["kubeadm init preflight fails on swap. Fix?",["pass --skip-swap to kubectl","swapoff -a and remove the fstab entry","restart containerd","enable zram"],1,"kubelet expects swap disabled by default"],
+["Required on every node before kubeadm init?",["a StorageClass","kubectl installed","sysctl net.ipv4.ip_forward set to 1","a CNI already applied"],2,"kubeadm preflight requires IPv4 forwarding enabled"]]},
 {id:"m3",name:"3 · Services and Networking",w:20,days:"Days 13 to 18",
 topics:"Service types, endpoints, DNS and CoreDNS, NetworkPolicy, Ingress, Gateway API, CNI, connectivity debugging",
 cards:[
@@ -134,10 +166,14 @@ cards:[
 ["NodePort range","30000 to 32767"],
 ["Headless service","clusterIP: None, DNS returns pod IPs"],
 ["Full DNS name of service web in namespace dev","web.dev.svc.cluster.local"],
-["Check a service's endpoints","kubectl get endpoints web"],
+["Check a service's endpoints on v1.33+","kubectl get endpointslices -l kubernetes.io/service-name=web (v1 Endpoints is deprecated)"],
 ["Test DNS from inside the cluster","kubectl run tmp --image=busybox:1.28 -it --rm -- nslookup web"],
 ["What provides pod-to-pod networking across nodes","the CNI plugin"],
-["NetworkPolicy default behavior","open until a policy selects the pod, then default deny for that direction"]],
+["NetworkPolicy default behavior","open until a policy selects the pod, then default deny for that direction"],
+["Gateway API resource chain","GatewayClass, then Gateway, then HTTPRoute"],
+["Bind an HTTPRoute to a Gateway","parentRefs naming the Gateway"],
+["Create an Ingress imperatively","kubectl create ingress web --rule=shop.com/cart=cart:8080"],
+["Serve HTTPS on an Ingress","spec.tls with a hosts list and a TLS secretName"]],
 quiz:[
 ["Valid NodePort range?",["1 to 1024","8000 to 9000","30000 to 32767","Any port"],2,"NodePorts live in 30000 to 32767"],
 ["A service with clusterIP set to None is",["broken","headless","external","node-local"],1,"Headless services skip the virtual IP"],
@@ -148,9 +184,13 @@ quiz:[
 ["An Ingress operates at",["L3","L4","L7 HTTP","L2"],2,"Ingress routes HTTP traffic"],
 ["Once a NetworkPolicy selects a pod for ingress",["all traffic allowed","non-matching ingress is denied","egress is blocked too","pod restarts"],1,"Selection flips that direction to default deny"],
 ["Gateway API is best described as",["a CNI plugin","the successor standard to Ingress","a service mesh","DNS provider"],1,"Gateway API extends and modernizes Ingress"],
-["Pods on different nodes can't reach each other. Most likely layer?",["RBAC","CNI plugin","StorageClass","Scheduler"],1,"Cross-node pod networking is the CNI's job"]]},
+["Pods on different nodes can't reach each other. Most likely layer?",["RBAC","CNI plugin","StorageClass","Scheduler"],1,"Cross-node pod networking is the CNI's job"],
+["Hostnames and path matches in the Gateway API live in",["Gateway","GatewayClass","HTTPRoute","ReferenceGrant"],2,"HTTPRoute holds the routing rules and backendRefs"],
+["Which object ties Gateways to the controller implementing them?",["GatewayClass","HTTPRoute","IngressClass","EndpointSlice"],0,"GatewayClass names the implementation, like a StorageClass for traffic"],
+["Ingress pathType matching /cart and everything under it",["Exact","Prefix","ImplementationSpecific","Regex"],1,"Prefix matches the path and its children"],
+["An Ingress is applied but traffic never routes. Likely missing?",["a NetworkPolicy","kube-proxy","a Gateway","an ingress controller"],3,"Ingress objects are inert without a controller"]]},
 {id:"m4",name:"4 · Storage",w:10,days:"Days 19 to 22",
-topics:"PV and PVC, StorageClasses, access modes, reclaim policies, dynamic provisioning, mounting volumes, emptyDir",
+topics:"PV and PVC, StorageClasses, access modes, reclaim policies, dynamic provisioning, mounting volumes, emptyDir, hostPath, ConfigMap and Secret volumes",
 cards:[
 ["PV vs PVC","cluster-wide resource vs namespaced claim"],
 ["Access modes","RWO, ROX, RWX, RWOP"],
@@ -159,7 +199,9 @@ cards:[
 ["emptyDir lifetime","deleted when the pod is deleted"],
 ["Mount a PVC in a pod","volumes with persistentVolumeClaim.claimName plus volumeMounts"],
 ["PVC stuck Pending means","no matching PV or StorageClass"],
-["RWX means","read-write by many nodes"]],
+["RWX means","read-write by many nodes"],
+["Mount a node directory into a pod","hostPath volume"],
+["Expose ConfigMap keys as files in a pod","configMap volume plus a volumeMount"]],
 quiz:[
 ["The namespaced object that requests storage is",["PV","PVC","StorageClass","VolumeMount"],1,"Claims are namespaced, PVs are not"],
 ["ReadWriteMany means",["one node writes","many nodes read-write","many pods on one node","read only"],1,"RWX allows many nodes to mount read-write"],
@@ -168,7 +210,9 @@ quiz:[
 ["An emptyDir volume survives",["pod restart on same node until pod deletion","node reboot","pod deletion","forever"],0,"It lives as long as the pod object"],
 ["A pod uses a PVC via",["spec.volumes persistentVolumeClaim.claimName","annotations","envFrom","configMapRef"],0,"Reference the claim by name in volumes"],
 ["PVC Pending, most likely cause",["image pull error","no PV or StorageClass matches","RBAC denied","taint"],1,"Nothing satisfies the claim's request"],
-["Which pair must match for binding",["capacity and access mode","namespace and node","labels and taints","image and tag"],0,"Size and access mode drive binding"]]},
+["Which pair must match for binding",["capacity and access mode","namespace and node","labels and taints","image and tag"],0,"Size and access mode drive binding"],
+["Volume type that mounts a directory from the node itself",["emptyDir","persistentVolumeClaim","projected","hostPath"],3,"hostPath exposes the node filesystem and is tied to that node"],
+["Serve Secret keys as files under /etc/creds",["a secret volume with a volumeMount","envFrom with secretRef","imagePullSecrets","a hostPath volume"],0,"Secret volumes project each key as a file"]]},
 {id:"m5",name:"5 · Troubleshooting Bootcamp",w:30,days:"Days 23 to 29",
 topics:"CrashLoopBackOff, ImagePullBackOff, Pending pods, NotReady nodes, kubelet, control plane static pods, service and DNS debugging, events, metrics",
 cards:[
@@ -192,7 +236,41 @@ quiz:[
 ["Pod Pending and describe shows unbound PVC",["fix the claim or class","restart scheduler","add toleration","scale up"],0,"Storage must bind before scheduling"],
 ["Service works by IP but not by name",["kube-proxy broken","DNS or CoreDNS issue","CNI down","RBAC"],1,"Name resolution points at DNS"],
 ["A node reports disk pressure. Expected effect?",["pods evicted and taint applied","node deleted","etcd compaction","nothing"],0,"Pressure taints the node and evicts"],
-["Scheduler logs on a kubeadm cluster live in",["journalctl -u scheduler","kube-system pod logs","'/var/log/sched'","kubectl top"],1,"Control plane components run as pods"]]}
+["Scheduler logs on a kubeadm cluster live in",["journalctl -u scheduler","kube-system pod logs","'/var/log/sched'","kubectl top"],1,"Control plane components run as pods"]]},
+{id:"m6",name:"6 · Exam Day, Docs, Speed",w:0,days:"Daily",
+topics:"PSI environment, ssh per task workflow, allowed docs, retake policy, docs navigation targets, speed habits",
+cards:[
+["Real exam format","15 to 20 hands-on terminal tasks, typically about 17, in 120 minutes"],
+["Real pass bar","66 percent, partial credit per task"],
+["Allowed reference","Firefox in the exam desktop: kubernetes.io docs and blog, helm.sh docs, gateway-api.sigs.k8s.io — multiple tabs OK, allowlist enforced"],
+["Where the exam runs","PSI remote XFCE desktop, your screen is a window into it"],
+["Retake policy","one free retake, 12 month window from purchase"],
+["Days before","run the PSI system compatibility check"],
+["Check-in","government photo ID, cleared room, check-in opens 30 minutes early and can take all 30"],
+["First move on every task","ssh into the designated host from the task infobox, exit before the next task"],
+["Fast YAML skeletons","export do='--dry-run=client -o yaml' — re-export after each ssh, every task host is a fresh shell"],
+["Preinstalled on exam hosts","alias k=kubectl with bash completion"],
+["Forgot a field name","kubectl explain pod.spec --recursive"],
+["Before leaving any task","verify with kubectl get or describe"],
+["Stuck past 8 minutes","flag it in the sidebar, skip, return, partial credit adds up"],
+["Docs search: NetworkPolicy skeleton","search network policies, copy the sample YAML"],
+["Docs search: PV and PVC pair","search configure a pod to use a persistent volume"],
+["Docs search: ConfigMap volume in a pod","search configure a pod to use a configmap"],
+["Docs search: etcd backup flags","search operating etcd clusters for kubernetes"],
+["Docs search: node affinity YAML","search assign pods to nodes using node affinity"],
+["Docs search: Ingress manifest","search ingress, minimal ingress resource"],
+["Docs for Gateway API YAML","gateway-api.sigs.k8s.io is on the allowlist"]],
+quiz:[
+["The real CKA exam format is",["15 to 20 hands-on tasks in 120 minutes","30 multiple choice questions in 30 minutes","10 tasks in 90 minutes","50 questions in 3 hours"],0,"Performance based terminal tasks, not MCQs"],
+["Real exam pass mark",["85 percent","75 percent","66 percent","90 percent"],2,"66 with partial credit per task"],
+["Allowed reference during the exam",["personal notes","any website","one killer.sh tab","official docs in Firefox: kubernetes.io, helm.sh, gateway-api.sigs.k8s.io"],3,"Allowlisted official docs only, multiple tabs are fine"],
+["First action on every exam task",["export do","open the docs","ssh into the designated host from the infobox","read all tasks first"],2,"Working on the wrong host or cluster scores zero for that task"],
+["A task is eating your time. Best move?",["flag it, skip, return later","grind until solved","skip permanently","end the exam early"],0,"Every task scores independently with partial credit"],
+["export do='--dry-run=client -o yaml' exists to",["apply faster","generate YAML skeletons from imperative commands","validate server side","alias kubectl"],1,"kubectl create deploy web --image=nginx $do gives instant YAML"],
+["CKA retake policy",["no retakes","unlimited free retakes","paid retake only","one free retake within 12 months of purchase"],3,"Purchase includes one retake, so book early"],
+["Forgot a spec field name mid task. Fastest fix?",["kubectl explain pod.spec --recursive","search google","kubectl describe","trial and error"],0,"explain prints the field tree, and google is against the rules"],
+["The exam runs on",["your local terminal","a PSI remote XFCE desktop","a browser-only web terminal","a VM you set up"],1,"You control a streamed Linux desktop"],
+["Before moving off any task",["verify with kubectl get or describe","clear bash history","delete YAML files","log out"],0,"A ten second check protects the points"]]}
 ];
 let S={tests:{},final:{best:0,attempts:0},cards:{},lastActive:"",streak:0};
 let tab="course";let quiz=null;let drill=null;let timerH=null;
@@ -223,7 +301,7 @@ h+='<div class="verdict glow">'+(ready()
 ?'<div class="big ready">CLAUDE SAYS: BOOK IT</div><div class="note">All modules and the final at 85 or higher. Run both killer.sh sessions in exam week, then schedule.</div>'
 :'<div class="big">NOT READY YET</div><div class="note">Pass every module test at '+PASS+'+ to unlock the final. Streak: '+S.streak+' day'+(S.streak===1?"":"s")+'.</div>')+'</div>';
 for(const m of M){const b=best(m.id);const done=b>=PASS;
-h+='<div class="mod'+(done?" done":"")+'"><div class="mhead"><div class="mname">'+m.name+'</div><div class="mmeta">'+m.days+' · '+m.w+'% of exam</div></div>';
+h+='<div class="mod'+(done?" done":"")+'"><div class="mhead"><div class="mname">'+m.name+'</div><div class="mmeta">'+m.days+' · '+(m.w?m.w+'% of exam':'free points')+'</div></div>';
 h+='<div class="topics">'+m.topics+'</div>';
 h+='<div class="mscore">Best test: <b>'+b+'%</b>'+(done?" · PASSED":" · pass bar "+PASS+"%")+'</div><div class="bar"><div style="width:'+Math.min(100,b)+'%"></div></div>';
 h+='<div class="btnrow"><button class="btn ghost" onclick="startDrill(\''+m.id+'\')">Drill</button><button class="btn" onclick="startQuiz(\''+m.id+'\')">Take test</button></div></div>'}
@@ -242,9 +320,9 @@ function mark(ok){if(ok){drill.got++;drill.q.splice(drill.i,1)}else{drill.miss++
 drill.show=false;if(drill.q.length===0){toast("Deck cleared. "+drill.got+" got, "+drill.miss+" missed");drill=null}else{drill.i=drill.i%drill.q.length}
 touchStreak();render()}
 function startQuiz(id){const m=M.find(x=>x.id===id);quiz={mode:"module",id:id,name:m.name,qs:shuffle(m.quiz.slice()),i:0,score:0,answered:-1,timeLeft:0};render()}
-function startFinal(){if(!allPassed()){toast("Pass all five module tests first");return}
+function startFinal(){if(!allPassed()){toast("Pass all module tests first");return}
 let pool=[];for(const m of M){const take=Math.round(30*m.w/100);pool=pool.concat(shuffle(m.quiz.slice()).slice(0,take))}
-quiz={mode:"final",id:"final",name:"Final Readiness Exam",qs:shuffle(pool),i:0,score:0,answered:-1,timeLeft:30*60};
+quiz={mode:"final",id:"final",name:"Final Readiness Exam",qs:shuffle(pool).slice(0,30),i:0,score:0,answered:-1,timeLeft:30*60};
 timerH=setInterval(()=>{quiz.timeLeft--;const el=$("tmr");if(el)el.textContent=fmt(quiz.timeLeft);if(quiz.timeLeft<=0)finishQuiz()},1000);render()}
 function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
 function renderQuiz(v){const q=quiz.qs[quiz.i];
@@ -265,18 +343,19 @@ else{S.final.attempts++;S.final.best=Math.max(S.final.best,pct)}
 touchStreak();save();
 toast(pct>=PASS?("PASSED at "+pct+"%"):(pct+"%. Bar is "+PASS+"%. Drill and retake"));
 quiz=null;tab= (S.final.best>=PASS&&allPassed())?"course":tab;syncTabs();render()}
-function renderFinal(v){let h='<div class="mod"><div class="mname">Final Readiness Exam</div><div class="topics">30 questions weighted like the real exam, 30 minute timer, instant grading. Unlocks when all five module tests are passed at '+PASS+'%.</div>';
+function renderFinal(v){let h='<div class="mod"><div class="mname">Final Readiness Exam</div><div class="topics">30 questions weighted by exam domain, 30 minute timer, instant grading. This gates recall only — the real exam is about 17 hands-on tasks in 120 minutes at a 66 bar with partial credit, so pair it with killercoda and killer.sh labs. Unlocks when all module tests are passed at '+PASS+'%.</div>';
 h+='<div class="mscore">Best: <b>'+S.final.best+'%</b> · attempts '+S.final.attempts+'</div><div class="bar"><div style="width:'+Math.min(100,S.final.best)+'%"></div></div>';
 h+='<div class="btnrow"><button class="btn" onclick="startFinal()" '+(allPassed()?"":"disabled")+'>Start final</button></div>';
 h+=allPassed()?'':'<div class="small">Locked: pass all module tests first.</div>';
 h+='</div>';
-h+='<div class="mod"><div class="mname">Exam week checklist</div><div class="topics">1. Pass this final at 85 or higher. 2. killer.sh session one, review every miss. 3. killer.sh session two, target 90+. 4. Book the real exam. The real pass bar is only 66, we train at 85.</div></div>';
+h+='<div class="mod"><div class="mname">Exam week checklist</div><div class="topics">1. Buy the exam now — the purchase is what unlocks both killer.sh sessions, plus a free retake and a 12 month window. Book a date 1 to 2 weeks out as your forcing function. 2. Pass this final at 85 or higher. 3. killer.sh session one, review every miss. 4. killer.sh session two — killer.sh runs harder than the real exam, so finishing most tasks and understanding every miss beats chasing 90. Real bar is 66 with partial credit, we train at 85.</div></div>';
 v.innerHTML=h}
 function renderSetup(v){v.innerHTML=
 '<div class="setupcard"><b>Phone (anywhere)</b><div class="topics">This app for drills and tests. killercoda.com free scenarios run in the mobile browser for quick labs.</div></div>'+
 '<div class="setupcard"><b>Work laptop</b><div class="topics">claude.ai is blocked there, so open your hosted copy of this app (github.io or workers.dev) in the browser. Never install anything on corporate hardware. If the proxy blocks the hosted page too, Claude Code in the terminal is your drill partner, ask it to quiz you on the current module.</div></div>'+
 '<div class="setupcard"><b>Personal Windows (weekend deep labs)</b><div class="topics">Install once, then you have a real cluster:</div><div class="cmd">winget install Kubernetes.kubectl<br>winget install Docker.DockerDesktop<br>go: kind create cluster --name cka</div><div class="topics" style="margin-top:6px">Week 2 onward, add a two node kubeadm practice cluster in VMs for install, upgrade, and etcd labs. I will walk you through it on day 7.</div></div>'+
-'<div class="setupcard"><b>Links</b><div class="topics"><a href="https://killercoda.com/playgrounds/scenario/kubernetes" target="_blank" rel="noopener">killercoda Kubernetes playground</a> · <a href="https://github.com/cncf/curriculum" target="_blank" rel="noopener">official CKA curriculum</a> · killer.sh sessions come with your exam purchase, save them for week 5.</div></div>'+
+'<div class="setupcard"><b>Exam environment</b><div class="topics">PSI remote XFCE desktop — your screen is a window into their Linux machine. Each task tells you which host to ssh into; kubectl there already points at the right cluster. Docs allowed in Firefox inside the desktop: kubernetes.io docs and blog, helm.sh docs, gateway-api.sigs.k8s.io. Run the PSI compatibility check days before, have government photo ID and a cleared room, check-in opens 30 minutes early.</div></div>'+
+'<div class="setupcard"><b>Links</b><div class="topics"><a href="https://killercoda.com/playgrounds/scenario/kubernetes" target="_blank" rel="noopener">killercoda Kubernetes playground</a> · <a href="https://github.com/cncf/curriculum" target="_blank" rel="noopener">official CKA curriculum</a> · killer.sh sessions come with your exam purchase, save them for exam week.</div></div>'+
 '<div class="setupcard"><b>Sync between machines</b><div class="topics">Inside Claude, progress follows your account automatically. On a hosted copy, progress saves to that browser only. To carry it across, copy a progress code on one machine and paste it on the other.</div><div class="btnrow"><button class="btn ghost" onclick="exportProg()">Copy progress code</button><button class="btn ghost" onclick="importProg()">Paste progress code</button></div></div>'+
 '<div class="small">Mode on this machine: '+(hasCS?"Claude account storage, synced":"browser storage, local to this device")+'</div>'}
 function exportProg(){try{const code=btoa(JSON.stringify(S));if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>toast("Progress code copied")).catch(()=>window.prompt("Copy this code:",code))}else{window.prompt("Copy this code:",code)}}catch(e){toast("Export failed")}}
