@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Grind Course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#150a02;--panel:#22110a;--panel2:#2b150b;--line:#6b3a14;--e1:#ff3d00;--e2:#ff8a00;--e3:#ffc24d;--w:#fff;--mut:#cfa27a;--dim:#8a6a4f;--ok:#7dd87d;--bad:#ff6b6b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--w);font-family:'Archivo',system-ui,sans-serif;font-size:18px;line-height:1.5}
+.wrap{max-width:800px;margin:0 auto;padding:16px 13px 90px}
+h1{font-family:'Anton',sans-serif;font-size:clamp(34px,9vw,52px);text-transform:uppercase;line-height:1}
+h1 .fl{background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.14em;margin-top:5px}
+.glow{border:1px solid rgba(255,138,0,.55);box-shadow:0 0 8px rgba(255,90,0,.4),inset 0 0 8px rgba(255,90,0,.1);border-radius:14px;background:var(--panel)}
+.tabs{display:flex;gap:7px;margin:16px 0 12px}
+.tab{flex:1;text-align:center;padding:11px 4px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--mut);font-family:'Anton',sans-serif;font-size:16.5px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+.tab.on{color:#1a0c02;background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3));border-color:transparent;box-shadow:0 0 8px rgba(255,90,0,.55)}
+.tab:focus-visible,button:focus-visible{outline:2px solid var(--e3);outline-offset:2px}
+.verdict{padding:14px;margin-bottom:12px;text-align:center}
+.verdict .big{font-family:'Anton',sans-serif;font-size:27px;letter-spacing:.03em}
+.verdict .big.ready{background:linear-gradient(90deg,var(--e2),var(--e3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.verdict .note{font-size:14.5px;color:var(--mut);margin-top:4px}
+.mod{padding:13px;margin-bottom:10px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}
+.mod.done{border-color:rgba(255,194,77,.7);box-shadow:0 0 8px rgba(255,140,0,.35)}
+.mhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.mname{font-weight:700;font-size:18px}
+.mmeta{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);white-space:nowrap}
+.mscore{font-family:'JetBrains Mono',monospace;font-size:13.5px;margin-top:5px;color:var(--mut)}
+.mscore b{color:var(--e3)}
+.topics{font-size:14px;color:var(--mut);margin-top:6px}
+.btnrow{display:flex;gap:8px;margin-top:10px}
+.btn{flex:1;border:none;border-radius:11px;padding:12px;font-family:'Anton',sans-serif;font-size:16.5px;letter-spacing:.05em;text-transform:uppercase;color:#1a0c02;background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3));cursor:pointer}
+.btn.ghost{background:none;color:var(--mut);border:1px solid var(--line)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.qcard{padding:16px}
+.qnum{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--dim);margin-bottom:8px;display:flex;justify-content:space-between}
+.qtext{font-weight:700;font-size:19px;margin-bottom:12px}
+.opt{display:block;width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:11px;color:var(--w);padding:12px;margin-bottom:8px;font-size:17px;font-family:'Archivo',sans-serif;cursor:pointer}
+.opt.right{border-color:var(--ok);box-shadow:0 0 8px rgba(125,216,125,.4)}
+.opt.wrong{border-color:var(--bad);box-shadow:0 0 8px rgba(255,107,107,.4)}
+.expl{font-size:15px;color:var(--mut);margin:4px 0 10px;font-style:italic}
+.timer{font-family:'JetBrains Mono',monospace;font-size:15.5px;color:var(--e3)}
+.card{padding:18px;text-align:center;min-height:150px;display:flex;flex-direction:column;justify-content:center;cursor:pointer}
+.card .lbl{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.14em;margin-bottom:8px}
+.card .txt{font-size:19px;font-weight:700}
+.card .txt.ans{font-family:'JetBrains Mono',monospace;font-size:16.5px;font-weight:400;color:var(--e3);word-break:break-word}
+.gotrow{display:flex;gap:8px;margin-top:10px}
+.gotrow .btn.miss{background:none;color:var(--bad);border:1px solid var(--bad)}
+.small{font-size:14px;color:var(--dim);margin-top:8px;font-family:'JetBrains Mono',monospace}
+.setupcard{padding:13px;margin-bottom:10px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}
+.setupcard b{color:var(--e3)}
+.setupcard .cmd{font-family:'JetBrains Mono',monospace;font-size:14px;background:var(--panel2);border-radius:8px;padding:8px;margin-top:6px;color:var(--mut);word-break:break-all}
+a{color:var(--e3)}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(80px);background:var(--panel2);border:1px solid rgba(255,138,0,.7);box-shadow:0 0 8px rgba(255,90,0,.6);border-radius:999px;padding:10px 20px;font-weight:700;font-size:15.5px;transition:transform .25s ease;z-index:50}
+#toast.show{transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+#loading{padding:60px 0;text-align:center;color:var(--mut);font-family:'JetBrains Mono',monospace;font-size:13.5px;text-transform:uppercase;letter-spacing:.16em}
+.bar{height:6px;border-radius:3px;background:#3a1d0c;margin-top:6px;overflow:hidden}
+.bar>div{height:100%;background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3))}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>CKA <span class="fl">Grind</span></h1>
+<div class="sub">Course mode · v1.35 curriculum · pass bar 85 · exam bar 66</div>
+<div id="loading">Loading course…</div>
+<div id="app" style="display:none">
+  <div class="tabs">
+    <button class="tab on" data-t="course">Course</button>
+    <button class="tab" data-t="drill">Drill</button>
+    <button class="tab" data-t="final">Final</button>
+    <button class="tab" data-t="setup">Setup</button>
+  </div>
+  <div id="view"></div>
+</div>
+</div>
+<div id="toast" role="status"></div>
+<script>
+const KEY="cka_course_v1";
+const PASS=85;
+const M=[
+{id:"m1",name:"1 · kubectl Fluency and Workloads",w:15,days:"Days 1 to 6",
+topics:"Pods, Deployments, scaling, rollouts, namespaces, labels, dry-run YAML, probes, requests and limits, taints, nodeSelector, DaemonSets, static pods, Jobs",
+cards:[
+["Run an nginx pod imperatively","kubectl run nginx --image=nginx"],
+["Generate deployment YAML without creating it","kubectl create deploy web --image=nginx --dry-run=client -o yaml"],
+["Scale a deployment to 5 replicas","kubectl scale deploy web --replicas=5"],
+["Open a shell inside a pod","kubectl exec -it web -- sh"],
+["Follow logs of a pod","kubectl logs -f web"],
+["Set default namespace for current context","kubectl config set-context --current --namespace=dev"],
+["Roll back a deployment","kubectl rollout undo deploy/web"],
+["Where do static pod manifests live","/etc/kubernetes/manifests"]],
+quiz:[
+["You need deployment YAML on disk without creating anything. Which command?",["kubectl get deploy web -o yaml","kubectl create deploy web --image=nginx --dry-run=client -o yaml","kubectl apply deploy web --image=nginx","kubectl run deploy web --image=nginx -o yaml"],1,"dry-run=client -o yaml generates without creating"],
+["Which controller guarantees exactly one pod per node?",["ReplicaSet","StatefulSet","DaemonSet","Job"],2,"DaemonSets schedule one pod on every node"],
+["A pod is Pending with message about an untolerated taint. Fastest fix?",["Increase replicas","Add a toleration to the pod","Delete the node","Restart kubelet"],1,"Tolerations let pods land on tainted nodes"],
+["The scheduler uses which value to place pods?",["limits","requests","actual usage","priorityClass only"],1,"Requests are the scheduling guarantee"],
+["A liveness probe keeps failing. What happens?",["Pod is evicted","Container is restarted","Service removes it","Node cordons"],1,"Liveness failure restarts the container"],
+["Run a pod only on nodes labeled disk=ssd, simplest way?",["taint the node","nodeSelector disk=ssd","affinity required only","label the pod"],1,"nodeSelector is the simple label match"],
+["Scale deploy web to 5 replicas imperatively",["kubectl scale deploy web --replicas=5","kubectl resize deploy web 5","kubectl set replicas web 5","kubectl edit rs web"],0,"scale is the imperative verb"],
+["Undo the last deployment rollout",["kubectl rollout undo deploy/web","kubectl rollback deploy/web","kubectl undo deploy/web","kubectl rollout revert web"],0,"rollout undo reverts to previous revision"],
+["Static pods are managed by",["kube-scheduler","the kubelet on that node","controller-manager","kubectl"],1,"kubelet watches the manifests directory"],
+["Interactive shell into container app in pod web",["kubectl attach web","kubectl exec -it web -c app -- sh","kubectl ssh web","kubectl run -it web sh"],1,"exec -it with container flag"]]},
+{id:"m2",name:"2 · Cluster Architecture, kubeadm, RBAC",w:25,days:"Days 7 to 12",
+topics:"Control plane anatomy, kubeadm init and join, upgrades, drain and cordon, etcd backup and restore, RBAC, ServiceAccounts, kubeconfig, Helm, Kustomize",
+cards:[
+["Control plane components","kube-apiserver, etcd, kube-scheduler, kube-controller-manager"],
+["Node components","kubelet, kube-proxy, container runtime"],
+["Back up etcd","ETCDCTL_API=3 etcdctl snapshot save /backup/snap.db (with cert flags)"],
+["Reprint the kubeadm join command","kubeadm token create --print-join-command"],
+["Safely empty a node for maintenance","kubectl drain node1 --ignore-daemonsets"],
+["Bring a drained node back","kubectl uncordon node1"],
+["Grant read-only pods in one namespace","Role + RoleBinding"],
+["Check what a user can do","kubectl auth can-i list pods --as bob"]],
+quiz:[
+["Which component stores all cluster state?",["kube-apiserver","etcd","controller-manager","kubelet"],1,"etcd is the cluster database"],
+["Which component assigns pods to nodes?",["kube-proxy","kube-scheduler","kubelet","apiserver"],1,"The scheduler binds pods to nodes"],
+["Correct kubeadm upgrade order?",["Workers first","Control plane first, then workers","kubelet first everywhere","Any order"],1,"Control plane upgrades before workers"],
+["Take node1 down for maintenance safely",["kubectl delete node node1","kubectl drain node1 --ignore-daemonsets","kubectl cordon node1 only","systemctl stop kubelet"],1,"Drain evicts pods and cordons"],
+["Read-only access to pods in namespace dev only. Which pair?",["ClusterRole + ClusterRoleBinding","Role + RoleBinding in dev","Role + ClusterRoleBinding","PodSecurityPolicy"],1,"Namespaced access uses Role + RoleBinding"],
+["Verify a ServiceAccount can delete deployments",["kubectl auth can-i delete deploy --as system:serviceaccount:dev:ci","kubectl describe sa ci","kubectl get rolebinding","kubectl test sa ci"],0,"auth can-i with the SA identity"],
+["The kubelet runs as",["a static pod","a systemd service on the node","a DaemonSet","part of apiserver"],1,"kubelet is the node agent under systemd"],
+["Restore etcd from snapshot, then",["restart kubectl","point etcd to the restored data dir","delete all pods","re-run kubeadm init"],1,"etcd must use the restored data directory"],
+["Install a chart with Helm",["helm apply repo/chart","helm install myrel repo/chart","helm create repo/chart","helm run chart"],1,"helm install release chart"],
+["Apply a kustomize directory",["kubectl apply -k dir/","kubectl kustomize apply dir/","kubectl apply -f -k dir/","kustomize install dir/"],0,"kubectl apply -k handles kustomizations"]]},
+{id:"m3",name:"3 · Services and Networking",w:20,days:"Days 13 to 18",
+topics:"Service types, endpoints, DNS and CoreDNS, NetworkPolicy, Ingress, Gateway API, CNI, connectivity debugging",
+cards:[
+["Service types","ClusterIP, NodePort, LoadBalancer, ExternalName"],
+["NodePort range","30000 to 32767"],
+["Headless service","clusterIP: None, DNS returns pod IPs"],
+["Full DNS name of service web in namespace dev","web.dev.svc.cluster.local"],
+["Check a service's endpoints","kubectl get endpoints web"],
+["Test DNS from inside the cluster","kubectl run tmp --image=busybox:1.28 -it --rm -- nslookup web"],
+["What provides pod-to-pod networking across nodes","the CNI plugin"],
+["NetworkPolicy default behavior","open until a policy selects the pod, then default deny for that direction"]],
+quiz:[
+["Valid NodePort range?",["1 to 1024","8000 to 9000","30000 to 32767","Any port"],2,"NodePorts live in 30000 to 32767"],
+["A service with clusterIP set to None is",["broken","headless","external","node-local"],1,"Headless services skip the virtual IP"],
+["FQDN for service api in namespace prod?",["api.prod.svc.cluster.local","prod.api.svc.cluster.local","api.svc.prod.cluster.local","api.cluster.local"],0,"name.namespace.svc.cluster.local"],
+["Service has zero endpoints. First check?",["Node taints","Selector matches pod labels","CoreDNS logs","kube-proxy version"],1,"Empty endpoints usually means label mismatch"],
+["Which component serves cluster DNS?",["kube-dns-proxy","CoreDNS","etcd","kubelet"],1,"CoreDNS runs in kube-system"],
+["Expose a deployment on every node's IP",["ClusterIP","NodePort","ExternalName","Headless"],1,"NodePort opens the port on all nodes"],
+["An Ingress operates at",["L3","L4","L7 HTTP","L2"],2,"Ingress routes HTTP traffic"],
+["Once a NetworkPolicy selects a pod for ingress",["all traffic allowed","non-matching ingress is denied","egress is blocked too","pod restarts"],1,"Selection flips that direction to default deny"],
+["Gateway API is best described as",["a CNI plugin","the successor standard to Ingress","a service mesh","DNS provider"],1,"Gateway API extends and modernizes Ingress"],
+["Pods on different nodes can't reach each other. Most likely layer?",["RBAC","CNI plugin","StorageClass","Scheduler"],1,"Cross-node pod networking is the CNI's job"]]},
+{id:"m4",name:"4 · Storage",w:10,days:"Days 19 to 22",
+topics:"PV and PVC, StorageClasses, access modes, reclaim policies, dynamic provisioning, mounting volumes, emptyDir",
+cards:[
+["PV vs PVC","cluster-wide resource vs namespaced claim"],
+["Access modes","RWO, ROX, RWX, RWOP"],
+["Dynamic provisioning comes from","StorageClass"],
+["Reclaim policy that keeps data","Retain"],
+["emptyDir lifetime","deleted when the pod is deleted"],
+["Mount a PVC in a pod","volumes with persistentVolumeClaim.claimName plus volumeMounts"],
+["PVC stuck Pending means","no matching PV or StorageClass"],
+["RWX means","read-write by many nodes"]],
+quiz:[
+["The namespaced object that requests storage is",["PV","PVC","StorageClass","VolumeMount"],1,"Claims are namespaced, PVs are not"],
+["ReadWriteMany means",["one node writes","many nodes read-write","many pods on one node","read only"],1,"RWX allows many nodes to mount read-write"],
+["Dynamic provisioning requires",["hostPath","a StorageClass","manual PV creation","a DaemonSet"],1,"StorageClasses provision PVs on demand"],
+["Reclaim policy that preserves data after claim deletion",["Delete","Recycle","Retain","Archive"],2,"Retain keeps the volume and data"],
+["An emptyDir volume survives",["pod restart on same node until pod deletion","node reboot","pod deletion","forever"],0,"It lives as long as the pod object"],
+["A pod uses a PVC via",["spec.volumes persistentVolumeClaim.claimName","annotations","envFrom","configMapRef"],0,"Reference the claim by name in volumes"],
+["PVC Pending, most likely cause",["image pull error","no PV or StorageClass matches","RBAC denied","taint"],1,"Nothing satisfies the claim's request"],
+["Which pair must match for binding",["capacity and access mode","namespace and node","labels and taints","image and tag"],0,"Size and access mode drive binding"]]},
+{id:"m5",name:"5 · Troubleshooting Bootcamp",w:30,days:"Days 23 to 29",
+topics:"CrashLoopBackOff, ImagePullBackOff, Pending pods, NotReady nodes, kubelet, control plane static pods, service and DNS debugging, events, metrics",
+cards:[
+["CrashLoopBackOff, first command","kubectl logs web --previous"],
+["Node NotReady, first check","systemctl status kubelet, then journalctl -u kubelet"],
+["API server down on kubeadm cluster, inspect via","crictl ps and the static pod manifest"],
+["Sort events by time","kubectl get events --sort-by=.metadata.creationTimestamp"],
+["kubectl top pods requires","metrics-server"],
+["Deployment shows 0 available but pods Running","check readiness probes"],
+["Service unreachable checklist","selector, endpoints, targetPort, NetworkPolicy"],
+["kubelet logs","journalctl -u kubelet"]],
+quiz:[
+["CrashLoopBackOff. Best first command?",["kubectl delete pod","kubectl logs pod --previous","kubectl top pod","kubectl cordon node"],1,"Previous logs show why the last run died"],
+["ImagePullBackOff most often means",["OOMKill","bad image name or registry auth","DNS down","node full"],1,"The image can't be pulled"],
+["Node NotReady. First service to inspect?",["kube-proxy","kubelet","CoreDNS","containerd only"],1,"kubelet health drives node readiness"],
+["Where do you read kubelet logs?",["kubectl logs kubelet","journalctl -u kubelet","cat /var/log/pods","dmesg"],1,"kubelet is a systemd unit"],
+["kubectl is refused, apiserver seems down on a kubeadm control plane. Inspect with",["kubectl describe","crictl ps and static pod manifests","helm status","etcdctl get"],1,"The apiserver is a static pod, use the runtime"],
+["List events oldest to newest",["kubectl get events -A","kubectl get events --sort-by=.metadata.creationTimestamp","kubectl describe events","kubectl logs events"],1,"Sort by creation timestamp"],
+["kubectl top nodes errors. Missing piece?",["Prometheus","metrics-server","Grafana","cAdvisor flag"],1,"top reads from metrics-server"],
+["Pods Running but deployment 0 available",["liveness failing","readiness probe failing","PVC unbound","taint"],1,"Readiness gates availability"],
+["Pod Pending and describe shows unbound PVC",["fix the claim or class","restart scheduler","add toleration","scale up"],0,"Storage must bind before scheduling"],
+["Service works by IP but not by name",["kube-proxy broken","DNS or CoreDNS issue","CNI down","RBAC"],1,"Name resolution points at DNS"],
+["A node reports disk pressure. Expected effect?",["pods evicted and taint applied","node deleted","etcd compaction","nothing"],0,"Pressure taints the node and evicts"],
+["Scheduler logs on a kubeadm cluster live in",["journalctl -u scheduler","kube-system pod logs","'/var/log/sched'","kubectl top"],1,"Control plane components run as pods"]]}
+];
+let S={tests:{},final:{best:0,attempts:0},cards:{},lastActive:"",streak:0};
+let tab="course";let quiz=null;let drill=null;let timerH=null;
+const $=id=>document.getElementById(id);
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2000)}
+const hasCS=typeof window!=="undefined"&&!!window.storage;
+async function rawGet(){if(hasCS){try{const r=await window.storage.get(KEY);return r&&r.value?r.value:null}catch(e){return null}}
+try{return localStorage.getItem(KEY)}catch(e){return null}}
+async function rawSet(v){if(hasCS){try{const r=await window.storage.set(KEY,v);return !!r}catch(e){return false}}
+try{localStorage.setItem(KEY,v);return true}catch(e){return false}}
+async function load(){const v=await rawGet();if(v){try{S=Object.assign(S,JSON.parse(v))}catch(e){}}
+touchStreak();$("loading").style.display="none";$("app").style.display="block";render()}
+async function save(){const ok=await rawSet(JSON.stringify(S));if(!ok)toast("Save failed")}
+function touchStreak(){const today=new Date().toISOString().slice(0,10);if(S.lastActive===today)return;const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=(S.lastActive===y)?S.streak+1:1;S.lastActive=today;save()}
+function best(id){return (S.tests[id]&&S.tests[id].best)||0}
+function allPassed(){return M.every(m=>best(m.id)>=PASS)}
+function ready(){return allPassed()&&S.final.best>=PASS}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.t;quiz=null;drill=null;if(timerH){clearInterval(timerH);timerH=null}
+document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===b));render()}))
+function render(){const v=$("view");
+if(quiz){renderQuiz(v);return}
+if(tab==="course")renderCourse(v);
+else if(tab==="drill")renderDrill(v);
+else if(tab==="final")renderFinal(v);
+else renderSetup(v)}
+function renderCourse(v){let h="";
+h+='<div class="verdict glow">'+(ready()
+?'<div class="big ready">CLAUDE SAYS: BOOK IT</div><div class="note">All modules and the final at 85 or higher. Run both killer.sh sessions in exam week, then schedule.</div>'
+:'<div class="big">NOT READY YET</div><div class="note">Pass every module test at '+PASS+'+ to unlock the final. Streak: '+S.streak+' day'+(S.streak===1?"":"s")+'.</div>')+'</div>';
+for(const m of M){const b=best(m.id);const done=b>=PASS;
+h+='<div class="mod'+(done?" done":"")+'"><div class="mhead"><div class="mname">'+m.name+'</div><div class="mmeta">'+m.days+' · '+m.w+'% of exam</div></div>';
+h+='<div class="topics">'+m.topics+'</div>';
+h+='<div class="mscore">Best test: <b>'+b+'%</b>'+(done?" · PASSED":" · pass bar "+PASS+"%")+'</div><div class="bar"><div style="width:'+Math.min(100,b)+'%"></div></div>';
+h+='<div class="btnrow"><button class="btn ghost" onclick="startDrill(\''+m.id+'\')">Drill</button><button class="btn" onclick="startQuiz(\''+m.id+'\')">Take test</button></div></div>'}
+v.innerHTML=h}
+function renderDrill(v){if(!drill){let h='<div class="small" style="margin-bottom:8px">Pick a deck. Tap card to flip. Missed cards come back.</div>';
+for(const m of M){h+='<div class="mod"><div class="mname">'+m.name+'</div><div class="btnrow"><button class="btn" onclick="startDrill(\''+m.id+'\')">Drill '+m.cards.length+' cards</button></div></div>'}
+v.innerHTML=h;return}
+const c=drill.q[drill.i];
+let h='<div class="glow card" onclick="flip()"><div class="lbl">'+(drill.show?"Answer":"Card "+(drill.i+1)+" of "+drill.q.length+" · tap to flip")+'</div><div class="txt'+(drill.show?" ans":"")+'">'+(drill.show?c[1]:c[0])+'</div></div>';
+if(drill.show)h+='<div class="gotrow"><button class="btn miss" onclick="mark(false)">Missed</button><button class="btn" onclick="mark(true)">Got it</button></div>';
+h+='<div class="small">'+drill.got+' got · '+drill.miss+' missed · <a href="#" onclick="drill=null;render();return false">exit deck</a></div>';
+v.innerHTML=h}
+function startDrill(id){const m=M.find(x=>x.id===id);drill={q:shuffle(m.cards.slice()),i:0,show:false,got:0,miss:0};tab="drill";syncTabs();render()}
+function flip(){drill.show=!drill.show;render()}
+function mark(ok){if(ok){drill.got++;drill.q.splice(drill.i,1)}else{drill.miss++;const c=drill.q.splice(drill.i,1)[0];drill.q.push(c)}
+drill.show=false;if(drill.q.length===0){toast("Deck cleared. "+drill.got+" got, "+drill.miss+" missed");drill=null}else{drill.i=drill.i%drill.q.length}
+touchStreak();render()}
+function startQuiz(id){const m=M.find(x=>x.id===id);quiz={mode:"module",id:id,name:m.name,qs:shuffle(m.quiz.slice()),i:0,score:0,answered:-1,timeLeft:0};render()}
+function startFinal(){if(!allPassed()){toast("Pass all five module tests first");return}
+let pool=[];for(const m of M){const take=Math.round(30*m.w/100);pool=pool.concat(shuffle(m.quiz.slice()).slice(0,take))}
+quiz={mode:"final",id:"final",name:"Final Readiness Exam",qs:shuffle(pool),i:0,score:0,answered:-1,timeLeft:30*60};
+timerH=setInterval(()=>{quiz.timeLeft--;const el=$("tmr");if(el)el.textContent=fmt(quiz.timeLeft);if(quiz.timeLeft<=0)finishQuiz()},1000);render()}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function renderQuiz(v){const q=quiz.qs[quiz.i];
+let h='<div class="glow qcard"><div class="qnum"><span>'+quiz.name+' · Q'+(quiz.i+1)+'/'+quiz.qs.length+'</span>'+(quiz.mode==="final"?'<span class="timer" id="tmr">'+fmt(quiz.timeLeft)+'</span>':'')+'</div>';
+h+='<div class="qtext">'+q[0]+'</div>';
+q[1].forEach((o,idx)=>{let cls="opt";if(quiz.answered>-1){if(idx===q[2])cls+=" right";else if(idx===quiz.answered)cls+=" wrong"}
+h+='<button class="'+cls+'" onclick="answer('+idx+')" '+(quiz.answered>-1?"disabled":"")+'>'+o+'</button>'});
+if(quiz.answered>-1)h+='<div class="expl">'+q[3]+'</div><button class="btn" onclick="nextQ()">'+(quiz.i+1<quiz.qs.length?"Next":"Finish")+'</button>';
+h+='<div class="small"><a href="#" onclick="abandonQuiz();return false">abandon test</a></div></div>';
+v.innerHTML=h}
+function answer(idx){if(quiz.answered>-1)return;quiz.answered=idx;if(idx===quiz.qs[quiz.i][2])quiz.score++;render()}
+function nextQ(){if(quiz.i+1<quiz.qs.length){quiz.i++;quiz.answered=-1;render()}else finishQuiz()}
+function abandonQuiz(){if(timerH){clearInterval(timerH);timerH=null}quiz=null;render()}
+function finishQuiz(){if(timerH){clearInterval(timerH);timerH=null}
+const pct=Math.round(100*quiz.score/quiz.qs.length);
+if(quiz.mode==="module"){const t=S.tests[quiz.id]||{best:0,attempts:0};t.attempts++;t.best=Math.max(t.best,pct);S.tests[quiz.id]=t}
+else{S.final.attempts++;S.final.best=Math.max(S.final.best,pct)}
+touchStreak();save();
+toast(pct>=PASS?("PASSED at "+pct+"%"):(pct+"%. Bar is "+PASS+"%. Drill and retake"));
+quiz=null;tab= (S.final.best>=PASS&&allPassed())?"course":tab;syncTabs();render()}
+function renderFinal(v){let h='<div class="mod"><div class="mname">Final Readiness Exam</div><div class="topics">30 questions weighted like the real exam, 30 minute timer, instant grading. Unlocks when all five module tests are passed at '+PASS+'%.</div>';
+h+='<div class="mscore">Best: <b>'+S.final.best+'%</b> · attempts '+S.final.attempts+'</div><div class="bar"><div style="width:'+Math.min(100,S.final.best)+'%"></div></div>';
+h+='<div class="btnrow"><button class="btn" onclick="startFinal()" '+(allPassed()?"":"disabled")+'>Start final</button></div>';
+h+=allPassed()?'':'<div class="small">Locked: pass all module tests first.</div>';
+h+='</div>';
+h+='<div class="mod"><div class="mname">Exam week checklist</div><div class="topics">1. Pass this final at 85 or higher. 2. killer.sh session one, review every miss. 3. killer.sh session two, target 90+. 4. Book the real exam. The real pass bar is only 66, we train at 85.</div></div>';
+v.innerHTML=h}
+function renderSetup(v){v.innerHTML=
+'<div class="setupcard"><b>Phone (anywhere)</b><div class="topics">This app for drills and tests. killercoda.com free scenarios run in the mobile browser for quick labs.</div></div>'+
+'<div class="setupcard"><b>Work laptop</b><div class="topics">claude.ai is blocked there, so open your hosted copy of this app (github.io or workers.dev) in the browser. Never install anything on corporate hardware. If the proxy blocks the hosted page too, Claude Code in the terminal is your drill partner, ask it to quiz you on the current module.</div></div>'+
+'<div class="setupcard"><b>Personal Windows (weekend deep labs)</b><div class="topics">Install once, then you have a real cluster:</div><div class="cmd">winget install Kubernetes.kubectl<br>winget install Docker.DockerDesktop<br>go: kind create cluster --name cka</div><div class="topics" style="margin-top:6px">Week 2 onward, add a two node kubeadm practice cluster in VMs for install, upgrade, and etcd labs. I will walk you through it on day 7.</div></div>'+
+'<div class="setupcard"><b>Links</b><div class="topics"><a href="https://killercoda.com/playgrounds/scenario/kubernetes" target="_blank" rel="noopener">killercoda Kubernetes playground</a> · <a href="https://github.com/cncf/curriculum" target="_blank" rel="noopener">official CKA curriculum</a> · killer.sh sessions come with your exam purchase, save them for week 5.</div></div>'+
+'<div class="setupcard"><b>Sync between machines</b><div class="topics">Inside Claude, progress follows your account automatically. On a hosted copy, progress saves to that browser only. To carry it across, copy a progress code on one machine and paste it on the other.</div><div class="btnrow"><button class="btn ghost" onclick="exportProg()">Copy progress code</button><button class="btn ghost" onclick="importProg()">Paste progress code</button></div></div>'+
+'<div class="small">Mode on this machine: '+(hasCS?"Claude account storage, synced":"browser storage, local to this device")+'</div>'}
+function exportProg(){try{const code=btoa(JSON.stringify(S));if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>toast("Progress code copied")).catch(()=>window.prompt("Copy this code:",code))}else{window.prompt("Copy this code:",code)}}catch(e){toast("Export failed")}}
+function importProg(){const code=window.prompt("Paste progress code:");if(!code)return;try{const inS=JSON.parse(atob(code.trim()));if(!inS||typeof inS!=="object")throw 0;S=Object.assign(S,inS);save();render();toast("Progress imported")}catch(e){toast("Bad code")}}
+function syncTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x.dataset.t===tab))}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+load();
+</script>
+</body>
+</html>
