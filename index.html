@@ -381,7 +381,11 @@ let sha=null;const g=await fetch(api+"?ref=master",{headers:h,cache:"no-store"})
 if(g.ok){const j=await g.json();sha=j.sha;try{if(b64d((j.content||"").replace(/\n/g,""))===body){setSyncStat("In sync");return}}catch(e){}}
 const payload={message:"progress sync",content:b64e(body),branch:"master"};if(sha)payload.sha=sha;
 const p=await fetch(api,{method:"PUT",headers:h,body:JSON.stringify(payload)});
-if(p.ok){setSyncStat("Synced "+new Date().toLocaleTimeString())}else{setSyncStat("Sync failed: HTTP "+p.status);toast("Cloud sync failed ("+p.status+")")}}
+if(p.ok){setSyncStat("Synced "+new Date().toLocaleTimeString())}else{const j=await p.json().catch(()=>({}));let hint="";
+if(p.status===403)hint=" — token can read but not write. Edit the token: Repository access = Only select repositories + cka-course, Permissions Contents = Read and write.";
+else if(p.status===404)hint=" — token cannot see this repo. Edit the token: Repository access = Only select repositories + cka-course.";
+else if(p.status===401)hint=" — token invalid or expired. Generate a new one and re-save it here.";
+setSyncStat("Sync failed: HTTP "+p.status+(j.message?" · "+j.message:"")+hint);toast("Cloud sync failed ("+p.status+")")}}
 catch(e){setSyncStat("Sync failed, offline?");toast("Cloud sync failed")}}
 async function load(){const v=await rawGet();if(v){try{S=Object.assign(S,JSON.parse(v))}catch(e){}}
 await pullRemote();
