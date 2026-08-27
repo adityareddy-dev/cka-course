@@ -61,6 +61,23 @@ a{color:var(--e3)}
 #loading{padding:60px 0;text-align:center;color:var(--mut);font-family:'JetBrains Mono',monospace;font-size:13.5px;text-transform:uppercase;letter-spacing:.16em}
 .bar{height:6px;border-radius:3px;background:#3a1d0c;margin-top:6px;overflow:hidden}
 .bar>div{height:100%;background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3))}
+details.learn{margin:11px 0 4px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);overflow:hidden}
+details.learn>summary{cursor:pointer;list-style:none;padding:10px 13px;font-family:'JetBrains Mono',monospace;font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--e3)}
+details.learn>summary::-webkit-details-marker{display:none}
+details.learn>summary::before{content:"▸ "}
+details.learn[open]>summary::before{content:"▾ "}
+details.learn .lbody{padding:2px 14px 15px;font-size:16.5px;line-height:1.55}
+.lbody h5{font-family:'Anton',sans-serif;font-size:19px;letter-spacing:.04em;text-transform:uppercase;color:var(--e2);margin:15px 0 6px}
+.lbody p{margin:8px 0}
+.lbody ul,.lbody ol{margin:8px 0 8px 22px}
+.lbody li{margin:5px 0}
+.lbody code{font-family:'JetBrains Mono',monospace;font-size:14px;background:#170b04;border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--e3);word-break:break-word}
+.lbody b{color:var(--e3)}
+details.sc{margin:9px 0;border:1px dashed var(--line);border-radius:9px;background:var(--panel)}
+details.sc>summary{cursor:pointer;list-style:none;padding:9px 12px;color:var(--mut);font-size:15.5px}
+details.sc>summary::-webkit-details-marker{display:none}
+details.sc .scans{padding:0 12px 11px;color:var(--ok);font-size:15.5px}
+.lbody .stubline{color:var(--mut);font-size:15.5px;margin:2px 0 6px}
 </style>
 </head>
 <body>
@@ -272,6 +289,57 @@ quiz:[
 ["The exam runs on",["your local terminal","a PSI remote XFCE desktop","a browser-only web terminal","a VM you set up"],1,"You control a streamed Linux desktop"],
 ["Before moving off any task",["verify with kubectl get or describe","clear bash history","delete YAML files","log out"],0,"A ten second check protects the points"]]}
 ];
+const LEARN={
+m1:`<details class="learn"><summary>Learn · Day 1 loaded · read before you drill</summary><div class="lbody">
+<h5>Day 1 · How Kubernetes actually works</h5>
+<p>Kubernetes is a declarative loop machine. You write <b>desired state</b> into a database, and independent controllers work forever to make reality match it. You never tell Kubernetes to do something, you tell it what should be true. Every component below is a specialist inside that loop.</p>
+<h5>The six components</h5>
+<ul>
+<li><b>kube-apiserver</b> · the front door. Everything talks to it, nothing talks around it. The only component that touches etcd.</li>
+<li><b>etcd</b> · the database. The cluster's entire truth as key-values.</li>
+<li><b>kube-scheduler</b> · watches for pods with no node assigned, picks a node. That is all it does. It never runs anything.</li>
+<li><b>kube-controller-manager</b> · runs the reconcile loops: Deployment controller, ReplicaSet controller, Node controller.</li>
+<li><b>kubelet</b> · the agent on every node. Sees "a pod is assigned to me," tells containerd to start containers, reports status back.</li>
+<li><b>kube-proxy</b> · programs each node's networking rules so Services actually route.</li>
+</ul>
+<h5>What happens on kubectl apply</h5>
+<ol>
+<li>kubectl sends to the API server (authn, authz, admission), which writes to etcd. Nothing has happened yet.</li>
+<li>Deployment controller notices, creates a ReplicaSet.</li>
+<li>ReplicaSet controller creates Pod objects. Still just database rows.</li>
+<li>Scheduler sees unassigned pods, stamps a node name on each.</li>
+<li>kubelet on that node sees its assignment, pulls the image, starts containers.</li>
+<li>kubelet reports status back up.</li>
+</ol>
+<h5>Why this is worth 30% of the exam</h5>
+<p>Every classic failure maps to a stage, so diagnosis becomes "which stage died":</p>
+<ul>
+<li>Pod stuck <b>Pending</b> · never left stage 4 · scheduler: resources, taints, no schedulable nodes.</li>
+<li><b>ImagePullBackOff</b> · stage 5 · kubelet, registry, or image name.</li>
+<li>Deployment exists, zero pods · stages 2 to 3 · controller-manager.</li>
+<li><code>kubectl</code> hangs or refuses connection · stage 1 · API server.</li>
+</ul>
+<h5>Static pods, the exam's favorite trick</h5>
+<p>On kubeadm clusters the control plane itself runs as <b>static pods</b>: plain YAML files in <code>/etc/kubernetes/manifests</code> that the node's kubelet runs directly, no scheduler involved. Delete one with kubectl and the kubelet instantly rebuilds it from the file. To truly stop it, move its manifest out of that folder. Break the apiserver and kubectl goes dead, so you repair it by editing the file on disk.</p>
+<h5>Lab · killercoda.com playground</h5>
+<ol>
+<li><code>kubectl get nodes -o wide</code> · see the machines.</li>
+<li><code>kubectl get pods -n kube-system</code> · spot the components running as pods.</li>
+<li><code>ls /etc/kubernetes/manifests</code> · the control plane as text on disk.</li>
+<li><code>kubectl describe node</code> · capacity, taints, conditions. Just read it.</li>
+</ol>
+<h5>Self-check · answer out loud before revealing</h5>
+<details class="sc"><summary>1 · Pod stuck Pending. Who did their job, who didn't?</summary><div class="scans">API server accepted it, controllers created the Pod object. The scheduler hasn't assigned a node, so no kubelet ever hears about it. Check resources, taints, node availability.</div></details>
+<details class="sc"><summary>2 · You delete a control plane pod and it comes right back. Why, and how do you stop it for real?</summary><div class="scans">It's a static pod. The kubelet runs it straight from its manifest in /etc/kubernetes/manifests and recreates it while the file exists. Move the file out of the directory to stop it.</div></details>
+<details class="sc"><summary>3 · The only component allowed to talk to etcd?</summary><div class="scans">kube-apiserver. Everything else goes through it.</div></details>
+<p class="stubline">Day 2 drops tomorrow: kubectl speed and YAML generation with $do.</p>
+</div></details>`,
+m2:`<details class="learn"><summary>Learn · drops Day 7</summary><div class="lbody"><p class="stubline">Lessons land here the morning we start this module. The drill deck below is open anytime for preview reps.</p></div></details>`,
+m3:`<details class="learn"><summary>Learn · drops Day 13</summary><div class="lbody"><p class="stubline">Lessons land here the morning we start this module. The drill deck below is open anytime for preview reps.</p></div></details>`,
+m4:`<details class="learn"><summary>Learn · drops Day 19</summary><div class="lbody"><p class="stubline">Lessons land here the morning we start this module. The drill deck below is open anytime for preview reps.</p></div></details>`,
+m5:`<details class="learn"><summary>Learn · drops Day 23</summary><div class="lbody"><p class="stubline">Lessons land here the morning we start this module. The drill deck below is open anytime for preview reps.</p></div></details>`,
+m6:`<details class="learn"><summary>Learn · reference, no lessons</summary><div class="lbody"><p class="stubline">Exam logistics live in the cards. Drill this deck once a week so booking, the docs allowlist, and the ssh-per-task rhythm are automatic by exam week.</p></div></details>`
+};
 let S={tests:{},final:{best:0,attempts:0},cards:{},lastActive:"",streak:0};
 let tab="course";let quiz=null;let drill=null;let timerH=null;
 const $=id=>document.getElementById(id);
@@ -303,6 +371,7 @@ h+='<div class="verdict glow">'+(ready()
 for(const m of M){const b=best(m.id);const done=b>=PASS;
 h+='<div class="mod'+(done?" done":"")+'"><div class="mhead"><div class="mname">'+m.name+'</div><div class="mmeta">'+m.days+' · '+(m.w?m.w+'% of exam':'free points')+'</div></div>';
 h+='<div class="topics">'+m.topics+'</div>';
+h+=(LEARN[m.id]||"");
 h+='<div class="mscore">Best test: <b>'+b+'%</b>'+(done?" · PASSED":" · pass bar "+PASS+"%")+'</div><div class="bar"><div style="width:'+Math.min(100,b)+'%"></div></div>';
 h+='<div class="btnrow"><button class="btn ghost" onclick="startDrill(\''+m.id+'\')">Drill</button><button class="btn" onclick="startQuiz(\''+m.id+'\')">Take test</button></div></div>'}
 v.innerHTML=h}
