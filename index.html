@@ -54,6 +54,7 @@ h1 .fl{background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3));-webkit-b
 .setupcard{padding:13px;margin-bottom:10px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}
 .setupcard b{color:var(--e3)}
 .setupcard .cmd{font-family:'JetBrains Mono',monospace;font-size:14px;background:var(--panel2);border-radius:8px;padding:8px;margin-top:6px;color:var(--mut);word-break:break-all}
+.setupcard input{width:100%;margin-top:8px;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--w);font-family:'JetBrains Mono',monospace;font-size:14px}
 a{color:var(--e3)}
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(80px);background:var(--panel2);border:1px solid rgba(255,138,0,.7);box-shadow:0 0 8px rgba(255,90,0,.6);border-radius:999px;padding:10px 20px;font-weight:700;font-size:15.5px;transition:transform .25s ease;z-index:50}
 #toast.show{transform:translateX(-50%) translateY(0)}
@@ -349,9 +350,41 @@ async function rawGet(){if(hasCS){try{const r=await window.storage.get(KEY);retu
 try{return localStorage.getItem(KEY)}catch(e){return null}}
 async function rawSet(v){if(hasCS){try{const r=await window.storage.set(KEY,v);return !!r}catch(e){return false}}
 try{localStorage.setItem(KEY,v);return true}catch(e){return false}}
+const SYNC_REPO="adityareddy-dev/cka-course";
+const TOKEN_KEY="cka_gh_token";
+function getTok(){try{return localStorage.getItem(TOKEN_KEY)||""}catch(e){return ""}}
+function setTok(v){try{if(v)localStorage.setItem(TOKEN_KEY,v);else localStorage.removeItem(TOKEN_KEY)}catch(e){}}
+function saveTok(){const v=$("tok").value.trim();setTok(v);toast(v?"Token saved to this browser":"Token cleared");render()}
+function mergeS(a,b){const out=JSON.parse(JSON.stringify(a));if(!b||typeof b!=="object")return out;
+for(const id in (b.tests||{})){const t=out.tests[id]||{best:0,attempts:0};const r=b.tests[id]||{};t.best=Math.max(t.best,r.best||0);t.attempts=Math.max(t.attempts,r.attempts||0);out.tests[id]=t}
+if(b.final){out.final.best=Math.max(out.final.best,b.final.best||0);out.final.attempts=Math.max(out.final.attempts,b.final.attempts||0)}
+out.streak=Math.max(out.streak||0,b.streak||0);
+if((b.lastActive||"")>(out.lastActive||""))out.lastActive=b.lastActive;
+if((b.updated||0)>(out.updated||0))out.updated=b.updated;
+return out}
+function progressSummary(){return M.map(m=>m.name+" — best "+best(m.id)+"% ("+((S.tests[m.id]||{attempts:0}).attempts)+" attempts)").join("; ")+" · final "+S.final.best+"% ("+S.final.attempts+" attempts) · streak "+S.streak+" days · module pass bar "+PASS+"%"}
+function setSyncStat(m){const el=$("syncstat");if(el)el.textContent=m}
+async function pullRemote(){try{const ac=new AbortController();const t=setTimeout(()=>ac.abort(),4000);let remote=null;const tok=getTok();
+if(tok){const r=await fetch("https://api.github.com/repos/"+SYNC_REPO+"/contents/progress.json?ref=master",{headers:{Authorization:"Bearer "+tok,Accept:"application/vnd.github+json"},cache:"no-store",signal:ac.signal});if(r.ok){const j=await r.json();remote=JSON.parse(atob((j.content||"").replace(/\n/g,"")))}}
+else{const r=await fetch("https://raw.githubusercontent.com/"+SYNC_REPO+"/master/progress.json?t="+Date.now(),{cache:"no-store",signal:ac.signal});if(r.ok)remote=await r.json()}
+clearTimeout(t);
+if(remote){const merged=mergeS(S,remote);if(JSON.stringify(merged)!==JSON.stringify(S)){S=merged;await rawSet(JSON.stringify(S))}}}catch(e){}}
+let pushT=null;
+function schedulePush(){if(!getTok())return;clearTimeout(pushT);pushT=setTimeout(pushRemote,2500)}
+async function pushRemote(){const tok=getTok();if(!tok){toast("Save a token first");return}
+const body=JSON.stringify(Object.assign({},S,{summary:progressSummary()}),null,1);
+try{const api="https://api.github.com/repos/"+SYNC_REPO+"/contents/progress.json";
+const h={Authorization:"Bearer "+tok,Accept:"application/vnd.github+json"};
+let sha=null;const g=await fetch(api+"?ref=master",{headers:h,cache:"no-store"});
+if(g.ok){const j=await g.json();sha=j.sha;try{if(atob((j.content||"").replace(/\n/g,""))===body){setSyncStat("In sync");return}}catch(e){}}
+const payload={message:"progress sync",content:btoa(body),branch:"master"};if(sha)payload.sha=sha;
+const p=await fetch(api,{method:"PUT",headers:h,body:JSON.stringify(payload)});
+if(p.ok){setSyncStat("Synced "+new Date().toLocaleTimeString())}else{setSyncStat("Sync failed: HTTP "+p.status);toast("Cloud sync failed ("+p.status+")")}}
+catch(e){setSyncStat("Sync failed, offline?");toast("Cloud sync failed")}}
 async function load(){const v=await rawGet();if(v){try{S=Object.assign(S,JSON.parse(v))}catch(e){}}
+await pullRemote();
 touchStreak();$("loading").style.display="none";$("app").style.display="block";render()}
-async function save(){const ok=await rawSet(JSON.stringify(S));if(!ok)toast("Save failed")}
+async function save(){S.updated=Date.now();const ok=await rawSet(JSON.stringify(S));if(!ok)toast("Save failed");schedulePush()}
 function touchStreak(){const today=new Date().toISOString().slice(0,10);if(S.lastActive===today)return;const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=(S.lastActive===y)?S.streak+1:1;S.lastActive=today;save()}
 function best(id){return (S.tests[id]&&S.tests[id].best)||0}
 function allPassed(){return M.every(m=>best(m.id)>=PASS)}
@@ -425,10 +458,11 @@ function renderSetup(v){v.innerHTML=
 '<div class="setupcard"><b>Personal Windows (weekend deep labs)</b><div class="topics">Install once, then you have a real cluster:</div><div class="cmd">winget install Kubernetes.kubectl<br>winget install Docker.DockerDesktop<br>go: kind create cluster --name cka</div><div class="topics" style="margin-top:6px">Week 2 onward, add a two node kubeadm practice cluster in VMs for install, upgrade, and etcd labs. I will walk you through it on day 7.</div></div>'+
 '<div class="setupcard"><b>Exam environment</b><div class="topics">PSI remote XFCE desktop — your screen is a window into their Linux machine. Each task tells you which host to ssh into; kubectl there already points at the right cluster. Docs allowed in Firefox inside the desktop: kubernetes.io docs and blog, helm.sh docs, gateway-api.sigs.k8s.io. Run the PSI compatibility check days before, have government photo ID and a cleared room, check-in opens 30 minutes early.</div></div>'+
 '<div class="setupcard"><b>Links</b><div class="topics"><a href="https://killercoda.com/playgrounds/scenario/kubernetes" target="_blank" rel="noopener">killercoda Kubernetes playground</a> · <a href="https://github.com/cncf/curriculum" target="_blank" rel="noopener">official CKA curriculum</a> · killer.sh sessions come with your exam purchase, save them for exam week.</div></div>'+
-'<div class="setupcard"><b>Sync between machines</b><div class="topics">Inside Claude, progress follows your account automatically. On a hosted copy, progress saves to that browser only. To carry it across, copy a progress code on one machine and paste it on the other.</div><div class="btnrow"><button class="btn ghost" onclick="exportProg()">Copy progress code</button><button class="btn ghost" onclick="importProg()">Paste progress code</button></div></div>'+
+'<div class="setupcard"><b>Cloud sync</b><div class="topics">Paste a fine-grained GitHub token (this repo only, Contents read and write) and every score auto-commits to progress.json in the repo. All devices with the token stay in sync, and your project chat reads progress from the raw URL at any time. The token never leaves this browser.</div><input id="tok" type="password" placeholder="github_pat_..."><div class="btnrow"><button class="btn ghost" onclick="saveTok()">Save token</button><button class="btn ghost" onclick="pushRemote()">Sync now</button></div><div class="small" id="syncstat">'+(getTok()?"Token saved on this device":"No token here — progress still downloads on load, but scores from this device do not upload")+'</div></div>'+
+'<div class="setupcard"><b>Sync fallback</b><div class="topics">On a machine where you would rather not store the token, carry progress by code instead.</div><div class="btnrow"><button class="btn ghost" onclick="exportProg()">Copy progress code</button><button class="btn ghost" onclick="importProg()">Paste progress code</button></div></div>'+
 '<div class="small">Mode on this machine: '+(hasCS?"Claude account storage, synced":"browser storage, local to this device")+'</div>'}
 function exportProg(){try{const code=btoa(JSON.stringify(S));if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>toast("Progress code copied")).catch(()=>window.prompt("Copy this code:",code))}else{window.prompt("Copy this code:",code)}}catch(e){toast("Export failed")}}
-function importProg(){const code=window.prompt("Paste progress code:");if(!code)return;try{const inS=JSON.parse(atob(code.trim()));if(!inS||typeof inS!=="object")throw 0;S=Object.assign(S,inS);save();render();toast("Progress imported")}catch(e){toast("Bad code")}}
+function importProg(){const code=window.prompt("Paste progress code:");if(!code)return;try{const inS=JSON.parse(atob(code.trim()));if(!inS||typeof inS!=="object")throw 0;S=mergeS(S,inS);save();render();toast("Progress imported")}catch(e){toast("Bad code")}}
 function syncTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x.dataset.t===tab))}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 load();
