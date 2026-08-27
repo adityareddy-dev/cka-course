@@ -364,8 +364,10 @@ if((b.updated||0)>(out.updated||0))out.updated=b.updated;
 return out}
 function progressSummary(){return M.map(m=>m.name+" — best "+best(m.id)+"% ("+((S.tests[m.id]||{attempts:0}).attempts)+" attempts)").join("; ")+" · final "+S.final.best+"% ("+S.final.attempts+" attempts) · streak "+S.streak+" days · module pass bar "+PASS+"%"}
 function setSyncStat(m){const el=$("syncstat");if(el)el.textContent=m}
+function b64e(s){return btoa(unescape(encodeURIComponent(s)))}
+function b64d(s){return decodeURIComponent(escape(atob(s)))}
 async function pullRemote(){try{const ac=new AbortController();const t=setTimeout(()=>ac.abort(),4000);let remote=null;const tok=getTok();
-if(tok){const r=await fetch("https://api.github.com/repos/"+SYNC_REPO+"/contents/progress.json?ref=master",{headers:{Authorization:"Bearer "+tok,Accept:"application/vnd.github+json"},cache:"no-store",signal:ac.signal});if(r.ok){const j=await r.json();remote=JSON.parse(atob((j.content||"").replace(/\n/g,"")))}}
+if(tok){const r=await fetch("https://api.github.com/repos/"+SYNC_REPO+"/contents/progress.json?ref=master",{headers:{Authorization:"Bearer "+tok,Accept:"application/vnd.github+json"},cache:"no-store",signal:ac.signal});if(r.ok){const j=await r.json();remote=JSON.parse(b64d((j.content||"").replace(/\n/g,"")))}}
 else{const r=await fetch("https://raw.githubusercontent.com/"+SYNC_REPO+"/master/progress.json?t="+Date.now(),{cache:"no-store",signal:ac.signal});if(r.ok)remote=await r.json()}
 clearTimeout(t);
 if(remote){const merged=mergeS(S,remote);if(JSON.stringify(merged)!==JSON.stringify(S)){S=merged;await rawSet(JSON.stringify(S))}}}catch(e){}}
@@ -376,8 +378,8 @@ const body=JSON.stringify(Object.assign({},S,{summary:progressSummary()}),null,1
 try{const api="https://api.github.com/repos/"+SYNC_REPO+"/contents/progress.json";
 const h={Authorization:"Bearer "+tok,Accept:"application/vnd.github+json"};
 let sha=null;const g=await fetch(api+"?ref=master",{headers:h,cache:"no-store"});
-if(g.ok){const j=await g.json();sha=j.sha;try{if(atob((j.content||"").replace(/\n/g,""))===body){setSyncStat("In sync");return}}catch(e){}}
-const payload={message:"progress sync",content:btoa(body),branch:"master"};if(sha)payload.sha=sha;
+if(g.ok){const j=await g.json();sha=j.sha;try{if(b64d((j.content||"").replace(/\n/g,""))===body){setSyncStat("In sync");return}}catch(e){}}
+const payload={message:"progress sync",content:b64e(body),branch:"master"};if(sha)payload.sha=sha;
 const p=await fetch(api,{method:"PUT",headers:h,body:JSON.stringify(payload)});
 if(p.ok){setSyncStat("Synced "+new Date().toLocaleTimeString())}else{setSyncStat("Sync failed: HTTP "+p.status);toast("Cloud sync failed ("+p.status+")")}}
 catch(e){setSyncStat("Sync failed, offline?");toast("Cloud sync failed")}}
