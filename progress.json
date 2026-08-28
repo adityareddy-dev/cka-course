@@ -1,5 +1,10 @@
 {
- "tests": {},
+ "tests": {
+  "m1": {
+   "best": 63,
+   "attempts": 1
+  }
+ },
  "final": {
   "best": 0,
   "attempts": 0
@@ -7,6 +12,6 @@
  "cards": {},
  "lastActive": "2026-08-28",
  "streak": 2,
- "updated": 1787875200105,
- "summary": "1 · kubectl Fluency and Workloads — best 0% (0 attempts); 2 · Cluster Architecture, kubeadm, RBAC — best 0% (0 attempts); 3 · Services and Networking — best 0% (0 attempts); 4 · Storage — best 0% (0 attempts); 5 · Troubleshooting Bootcamp — best 0% (0 attempts); 6 · Exam Day, Docs, Speed — best 0% (0 attempts) · final 0% (0 attempts) · streak 2 days · module pass bar 85%"
+ "updated": 1787880202962,
+ "summary": "1 · kubectl Fluency and Workloads — best 63% (1 attempts); 2 · Cluster Architecture, kubeadm, RBAC — best 0% (0 attempts); 3 · Services and Networking — best 0% (0 attempts); 4 · Storage — best 0% (0 attempts); 5 · Troubleshooting Bootcamp — best 0% (0 attempts); 6 · Exam Day, Docs, Speed — best 0% (0 attempts) · final 0% (0 attempts) · streak 2 days · module pass bar 85%"
 }
