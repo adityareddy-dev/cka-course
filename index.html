@@ -78,6 +78,7 @@ details.sc{margin:9px 0;border:1px dashed var(--line);border-radius:9px;backgrou
 details.sc>summary{cursor:pointer;list-style:none;padding:9px 12px;color:var(--mut);font-size:15.5px}
 details.sc>summary::-webkit-details-marker{display:none}
 details.sc .scans{padding:0 12px 11px;color:var(--ok);font-size:15.5px}
+.lbody pre{font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.5;background:#170b04;border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin:8px 0;color:var(--e3);overflow-x:auto;white-space:pre}
 .lbody .stubline{color:var(--mut);font-size:15.5px;margin:2px 0 6px}
 </style>
 </head>
@@ -117,7 +118,12 @@ cards:[
 ["Autoscale deploy web 2 to 10 pods at 70 percent CPU","kubectl autoscale deploy web --min=2 --max=10 --cpu=70% (old --cpu-percent=70 is deprecated but still works)"],
 ["VPA changes","pod requests and limits, HPA changes replica count"],
 ["Hard node affinity rule","requiredDuringSchedulingIgnoredDuringExecution"],
-["Make pods schedule ahead of others","PriorityClass plus priorityClassName in the pod spec"]],
+["Make pods schedule ahead of others","PriorityClass plus priorityClassName in the pod spec"],
+["Recreate a pod from a file when apply says the field is immutable","kubectl replace --force -f pod.yaml"],
+["Exact field names for a probe without opening the docs","kubectl explain pod.spec.containers.livenessProbe (add --recursive for the subtree)"],
+["Delete a pod without the 30 second grace wait","kubectl delete pod web --force --grace-period=0 (export now='--force --grace-period=0')"],
+["Change a deployment's image imperatively","kubectl set image deploy/web nginx=nginx:1.27"],
+["Expose deploy web on port 80 to container port 8080","kubectl expose deploy web --port=80 --target-port=8080"]],
 quiz:[
 ["You need deployment YAML on disk without creating anything. Which command?",["kubectl get deploy web -o yaml","kubectl create deploy web --image=nginx --dry-run=client -o yaml","kubectl apply deploy web --image=nginx","kubectl run deploy web --image=nginx -o yaml"],1,"dry-run=client -o yaml generates without creating"],
 ["Which controller guarantees exactly one pod per node?",["ReplicaSet","StatefulSet","DaemonSet","Job"],2,"DaemonSets schedule one pod on every node"],
@@ -291,7 +297,7 @@ quiz:[
 ["Before moving off any task",["verify with kubectl get or describe","clear bash history","delete YAML files","log out"],0,"A ten second check protects the points"]]}
 ];
 const LEARN={
-m1:`<details class="learn"><summary>Learn · Day 1 loaded · read before you drill</summary><div class="lbody">
+m1:`<details class="learn"><summary>Learn · Day 1 · How Kubernetes actually works</summary><div class="lbody">
 <h5>Day 1 · How Kubernetes actually works</h5>
 <p>Kubernetes is a declarative loop machine. You write <b>desired state</b> into a database, and independent controllers work forever to make reality match it. You never tell Kubernetes to do something, you tell it what should be true. Every component below is a specialist inside that loop.</p>
 <h5>The six components</h5>
@@ -333,7 +339,71 @@ m1:`<details class="learn"><summary>Learn · Day 1 loaded · read before you dri
 <details class="sc"><summary>1 · Pod stuck Pending. Who did their job, who didn't?</summary><div class="scans">API server accepted it, controllers created the Pod object. The scheduler hasn't assigned a node, so no kubelet ever hears about it. Check resources, taints, node availability.</div></details>
 <details class="sc"><summary>2 · You delete a control plane pod and it comes right back. Why, and how do you stop it for real?</summary><div class="scans">It's a static pod. The kubelet runs it straight from its manifest in /etc/kubernetes/manifests and recreates it while the file exists. Move the file out of the directory to stop it.</div></details>
 <details class="sc"><summary>3 · The only component allowed to talk to etcd?</summary><div class="scans">kube-apiserver. Everything else goes through it.</div></details>
-<p class="stubline">Day 2 drops tomorrow: kubectl speed and YAML generation with $do.</p>
+</div></details>
+<details class="learn"><summary>Learn · Day 2 loaded · kubectl speed and YAML with $do</summary><div class="lbody">
+<h5>Day 2 · kubectl speed and YAML generation</h5>
+<p>The exam is two hours for roughly 17 tasks. Nobody fails it on knowledge, people fail it on typing. Today is about never writing YAML from a blank file again: you make kubectl generate a skeleton, edit the two lines that matter, apply. Every task becomes the same three moves.</p>
+<h5>First 20 seconds on every host</h5>
+<p>Exam hosts already have <code>alias k=kubectl</code> with bash completion. What they do not have is your shortcuts, and every <code>ssh</code> lands you in a fresh shell, so this is muscle memory, not setup:</p>
+<pre>export do='--dry-run=client -o yaml'
+export now='--force --grace-period=0'</pre>
+<p><code>$do</code> means "show me the YAML you would send, send nothing." <code>$now</code> kills a pod without the 30 second grace wait. Re-export after each ssh, no exceptions.</p>
+<h5>The three-move loop</h5>
+<pre>k run web --image=nginx --port=80 $do > web.yaml
+vim web.yaml        # add the field the task asked for
+k apply -f web.yaml</pre>
+<p>If the object already exists and the field is immutable (most pod spec fields are), <code>k apply</code> refuses. Then it is <code>k replace --force -f web.yaml</code>, which deletes and recreates in one go. For deployments <code>k apply</code> or <code>k edit</code> is fine because the template rolls out.</p>
+<h5>Generators worth having in your fingers</h5>
+<ul>
+<li><b>Pod</b> · <code>k run web --image=nginx --port=80 --labels=app=web --env=MODE=prod $do</code></li>
+<li><b>Pod with a command</b> · <code>k run busy --image=busybox $do -- sh -c 'sleep 3600'</code> · everything after <code>--</code> becomes the container command.</li>
+<li><b>Throwaway debug pod</b> · <code>k run tmp --image=busybox -it --rm --restart=Never -- wget -qO- http://web</code> · gone when you exit.</li>
+<li><b>Deployment</b> · <code>k create deploy web --image=nginx --replicas=3 --port=80 $do</code></li>
+<li><b>Service</b> · <code>k expose deploy web --port=80 --target-port=8080 --name=web-svc $do</code> · expose copies the selector from the target for you. <code>k create svc clusterip web --tcp=80:8080</code> exists but guesses a selector of app=web, so expose is safer.</li>
+<li><b>Job / CronJob</b> · <code>k create job once --image=busybox $do -- date</code> · <code>k create cronjob tick --image=busybox --schedule='*/5 * * * *' $do -- date</code></li>
+<li><b>Config</b> · <code>k create cm app --from-literal=MODE=prod --from-file=app.conf $do</code> · same shape for <code>k create secret generic</code></li>
+<li><b>Namespace, SA, RBAC</b> · <code>k create ns dev</code>, <code>k create sa deploy-bot</code>, <code>k create role</code> / <code>rolebinding</code> (Day 9 goes deep on these).</li>
+</ul>
+<h5>Change things without opening an editor</h5>
+<ul>
+<li><code>k set image deploy/web nginx=nginx:1.27</code> · container name equals image name, check with <code>k get deploy web -o jsonpath='{.spec.template.spec.containers[*].name}'</code></li>
+<li><code>k set resources deploy web --requests=cpu=100m,memory=128Mi --limits=cpu=500m,memory=256Mi</code></li>
+<li><code>k set env deploy/web MODE=prod</code></li>
+<li><code>k scale deploy web --replicas=5</code> · <code>k rollout status deploy/web</code> · <code>k rollout undo deploy/web</code></li>
+<li><code>k label pod web tier=front</code> · <code>k annotate</code> works the same · <code>k label pod web tier-</code> removes.</li>
+</ul>
+<h5>What the generators cannot do</h5>
+<p>Probes, volumes, nodeSelector, tolerations, affinity, securityContext, initContainers, resource fields on a pod. For these the skeleton gets you the frame and you type the block. Two tools replace memorising the shape:</p>
+<pre>k explain pod.spec.containers.livenessProbe
+k explain pod.spec.tolerations --recursive
+k explain deploy.spec.strategy</pre>
+<p><code>explain</code> is offline, faster than the docs tab, and prints exact field names and types. The docs are for copying a whole block (a PV, a NetworkPolicy); explain is for "was it <code>httpGet</code> or <code>httpget</code>."</p>
+<h5>Reading fast</h5>
+<ul>
+<li><code>k get po -o wide</code> · node and IP in one line. <code>-A</code> for all namespaces. <code>--show-labels</code>, <code>-l app=web</code>.</li>
+<li><code>k get po --sort-by=.metadata.creationTimestamp</code> · newest at the bottom, handy in troubleshooting.</li>
+<li><code>k get po -o name</code> and <code>--no-headers</code> · pipe-friendly. <code>k get po -o name | xargs k delete $now</code> clears a namespace.</li>
+<li><code>k api-resources</code> · every short name (<code>po deploy svc cm sa ns pv pvc netpol ing</code>) and whether it is namespaced. Learn it once.</li>
+<li><code>k describe</code> the moment anything is not Running. The Events at the bottom are the answer nine times out of ten.</li>
+</ul>
+<h5>vim in two lines</h5>
+<p>YAML dies on tabs. First edit on a host, set this (or drop it in <code>~/.vimrc</code>, it survives on that host):</p>
+<pre>:set et ts=2 sw=2</pre>
+<p>Then <code>&gt;&gt;</code> and <code>&lt;&lt;</code> indent by 2, <code>V</code> plus <code>&gt;</code> indents a block, <code>:set paste</code> before pasting from the docs so autoindent does not stair-step it.</p>
+<h5>Lab · killercoda.com playground</h5>
+<ol>
+<li>Export <code>do</code> and <code>now</code>. Generate a pod YAML with <code>k run</code>, add a <code>livenessProbe</code> (httpGet on port 80, path /), apply, confirm with <code>k describe po</code>.</li>
+<li>Create deploy <code>web</code> with 3 replicas, expose it on 80, curl it from a throwaway busybox pod by service name.</li>
+<li>Change the image to <code>nginx:1.27</code> with <code>k set image</code>, watch <code>k rollout status</code>, then <code>k rollout undo</code>.</li>
+<li>Try <code>k apply</code> after changing the pod's image in the file, read the error, then fix it with <code>k replace --force</code>.</li>
+<li>Time yourself: pod with nodeSelector <code>disk=ssd</code> and a 512Mi memory limit, from zero to Running. Target under 90 seconds.</li>
+</ol>
+<h5>Self-check · answer out loud before revealing</h5>
+<details class="sc"><summary>1 · You changed a pod's command in its YAML and apply says the field is immutable. Fastest fix?</summary><div class="scans">k replace --force -f pod.yaml. It deletes and recreates the pod from the file in one step.</div></details>
+<details class="sc"><summary>2 · You need the exact field names for a startup probe and the docs tab is slow. What do you run?</summary><div class="scans">k explain pod.spec.containers.startupProbe (add --recursive to see the whole subtree). Offline and exact.</div></details>
+<details class="sc"><summary>3 · Why use k expose instead of k create svc for an existing deployment?</summary><div class="scans">expose reads the selector off the deployment, so the Service points at the right pods. create svc guesses app=name and silently selects nothing if the labels differ.</div></details>
+<details class="sc"><summary>4 · You just ssh'd to a new host and typed k run web --image=nginx $do and it created the pod. What went wrong?</summary><div class="scans">$do was empty, the export does not survive ssh. Delete the pod with $now (after re-exporting both) and re-run.</div></details>
+<p class="stubline">Day 3 drops tomorrow: scheduling, requests and limits, taints, affinity, and why Pending is the most common word in Module 5.</p>
 </div></details>`,
 m2:`<details class="learn"><summary>Learn · drops Day 7</summary><div class="lbody"><p class="stubline">Lessons land here the morning we start this module. The drill deck below is open anytime for preview reps.</p></div></details>`,
 m3:`<details class="learn"><summary>Learn · drops Day 13</summary><div class="lbody"><p class="stubline">Lessons land here the morning we start this module. The drill deck below is open anytime for preview reps.</p></div></details>`,
