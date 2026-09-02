@@ -8,24 +8,24 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#150a02;--panel:#22110a;--panel2:#2b150b;--line:#6b3a14;--e1:#ff3d00;--e2:#ff8a00;--e3:#ffc24d;--w:#fff;--mut:#cfa27a;--dim:#8a6a4f;--ok:#7dd87d;--bad:#ff6b6b}
+:root{--bg:#0b1020;--panel:#141b31;--panel2:#1b2440;--line:#2c3b66;--e1:#326ce5;--e2:#5b9bff;--e3:#9ec5ff;--w:#eef2ff;--mut:#a9b8dc;--dim:#7386ad;--ok:#4ade80;--bad:#ff6b6b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--w);font-family:'Archivo',system-ui,sans-serif;font-size:18px;line-height:1.5}
 .wrap{max-width:800px;margin:0 auto;padding:16px 13px 90px}
 h1{font-family:'Anton',sans-serif;font-size:clamp(34px,9vw,52px);text-transform:uppercase;line-height:1}
 h1 .fl{background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3));-webkit-background-clip:text;background-clip:text;color:transparent}
 .sub{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.14em;margin-top:5px}
-.glow{border:1px solid rgba(255,138,0,.55);box-shadow:0 0 8px rgba(255,90,0,.4),inset 0 0 8px rgba(255,90,0,.1);border-radius:14px;background:var(--panel)}
+.glow{border:1px solid rgba(50,108,229,.55);box-shadow:0 0 8px rgba(50,108,229,.4),inset 0 0 8px rgba(50,108,229,.1);border-radius:14px;background:var(--panel)}
 .tabs{display:flex;gap:7px;margin:16px 0 12px}
 .tab{flex:1;text-align:center;padding:11px 4px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--mut);font-family:'Anton',sans-serif;font-size:16.5px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
-.tab.on{color:#1a0c02;background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3));border-color:transparent;box-shadow:0 0 8px rgba(255,90,0,.55)}
+.tab.on{color:#06122b;background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3));border-color:transparent;box-shadow:0 0 8px rgba(50,108,229,.55)}
 .tab:focus-visible,button:focus-visible{outline:2px solid var(--e3);outline-offset:2px}
 .verdict{padding:14px;margin-bottom:12px;text-align:center}
 .verdict .big{font-family:'Anton',sans-serif;font-size:27px;letter-spacing:.03em}
 .verdict .big.ready{background:linear-gradient(90deg,var(--e2),var(--e3));-webkit-background-clip:text;background-clip:text;color:transparent}
 .verdict .note{font-size:14.5px;color:var(--mut);margin-top:4px}
 .mod{padding:13px;margin-bottom:10px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}
-.mod.done{border-color:rgba(255,194,77,.7);box-shadow:0 0 8px rgba(255,140,0,.35)}
+.mod.done{border-color:rgba(158,197,255,.7);box-shadow:0 0 8px rgba(91,155,255,.35)}
 .mhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .mname{font-weight:700;font-size:18px}
 .mmeta{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);white-space:nowrap}
@@ -33,7 +33,7 @@ h1 .fl{background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3));-webkit-b
 .mscore b{color:var(--e3)}
 .topics{font-size:14px;color:var(--mut);margin-top:6px}
 .btnrow{display:flex;gap:8px;margin-top:10px}
-.btn{flex:1;border:none;border-radius:11px;padding:12px;font-family:'Anton',sans-serif;font-size:16.5px;letter-spacing:.05em;text-transform:uppercase;color:#1a0c02;background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3));cursor:pointer}
+.btn{flex:1;border:none;border-radius:11px;padding:12px;font-family:'Anton',sans-serif;font-size:16.5px;letter-spacing:.05em;text-transform:uppercase;color:#06122b;background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3));cursor:pointer}
 .btn.ghost{background:none;color:var(--mut);border:1px solid var(--line)}
 .btn:disabled{opacity:.35;cursor:not-allowed}
 .qcard{padding:16px}
@@ -56,11 +56,20 @@ h1 .fl{background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3));-webkit-b
 .setupcard .cmd{font-family:'JetBrains Mono',monospace;font-size:14px;background:var(--panel2);border-radius:8px;padding:8px;margin-top:6px;color:var(--mut);word-break:break-all}
 .setupcard input{width:100%;margin-top:8px;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--w);font-family:'JetBrains Mono',monospace;font-size:14px}
 a{color:var(--e3)}
-#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(80px);background:var(--panel2);border:1px solid rgba(255,138,0,.7);box-shadow:0 0 8px rgba(255,90,0,.6);border-radius:999px;padding:10px 20px;font-weight:700;font-size:15.5px;transition:transform .25s ease;z-index:50}
+.ansbox{width:100%;margin-top:10px;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0e1428;color:var(--w);font-family:'JetBrains Mono',monospace;font-size:15.5px}
+.ansbox:focus{outline:2px solid var(--e2);border-color:transparent}
+.verdictline{font-family:'JetBrains Mono',monospace;font-size:14px;margin-top:10px;padding:9px 11px;border-radius:9px}
+.verdictline.good{color:var(--ok);border:1px solid var(--ok)}
+.verdictline.bad{color:var(--bad);border:1px solid var(--bad)}
+.expected{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--e3);background:#0e1428;border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin-top:8px;word-break:break-word}
+.proctorbar{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}
+.proctorbar .live{color:var(--e2)}
+.viol{color:var(--bad)}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(80px);background:var(--panel2);border:1px solid rgba(50,108,229,.7);box-shadow:0 0 8px rgba(50,108,229,.6);border-radius:999px;padding:10px 20px;font-weight:700;font-size:15.5px;transition:transform .25s ease;z-index:50}
 #toast.show{transform:translateX(-50%) translateY(0)}
 @media (prefers-reduced-motion:reduce){#toast{transition:none}}
 #loading{padding:60px 0;text-align:center;color:var(--mut);font-family:'JetBrains Mono',monospace;font-size:13.5px;text-transform:uppercase;letter-spacing:.16em}
-.bar{height:6px;border-radius:3px;background:#3a1d0c;margin-top:6px;overflow:hidden}
+.bar{height:6px;border-radius:3px;background:#1b2440;margin-top:6px;overflow:hidden}
 .bar>div{height:100%;background:linear-gradient(90deg,var(--e1),var(--e2),var(--e3))}
 details.learn{margin:11px 0 4px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);overflow:hidden}
 details.learn>summary{cursor:pointer;list-style:none;padding:10px 13px;font-family:'JetBrains Mono',monospace;font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--e3)}
@@ -72,13 +81,13 @@ details.learn .lbody{padding:2px 14px 15px;font-size:16.5px;line-height:1.55}
 .lbody p{margin:8px 0}
 .lbody ul,.lbody ol{margin:8px 0 8px 22px}
 .lbody li{margin:5px 0}
-.lbody code{font-family:'JetBrains Mono',monospace;font-size:14px;background:#170b04;border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--e3);word-break:break-word}
+.lbody code{font-family:'JetBrains Mono',monospace;font-size:14px;background:#0e1428;border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--e3);word-break:break-word}
 .lbody b{color:var(--e3)}
 details.sc{margin:9px 0;border:1px dashed var(--line);border-radius:9px;background:var(--panel)}
 details.sc>summary{cursor:pointer;list-style:none;padding:9px 12px;color:var(--mut);font-size:15.5px}
 details.sc>summary::-webkit-details-marker{display:none}
 details.sc .scans{padding:0 12px 11px;color:var(--ok);font-size:15.5px}
-.lbody pre{font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.5;background:#170b04;border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin:8px 0;color:var(--e3);overflow-x:auto;white-space:pre}
+.lbody pre{font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.5;background:#0e1428;border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin:8px 0;color:var(--e3);overflow-x:auto;white-space:pre}
 .lbody .stubline{color:var(--mut);font-size:15.5px;margin:2px 0 6px}
 </style>
 </head>
@@ -411,7 +420,7 @@ m4:`<details class="learn"><summary>Learn · drops Day 19</summary><div class="l
 m5:`<details class="learn"><summary>Learn · drops Day 23</summary><div class="lbody"><p class="stubline">Lessons land here the morning we start this module. The drill deck below is open anytime for preview reps.</p></div></details>`,
 m6:`<details class="learn"><summary>Learn · reference, no lessons</summary><div class="lbody"><p class="stubline">Exam logistics live in the cards. Drill this deck once a week so booking, the docs allowlist, and the ssh-per-task rhythm are automatic by exam week.</p></div></details>`
 };
-let S={tests:{},final:{best:0,attempts:0},cards:{},lastActive:"",streak:0};
+let S={tests:{},final:{best:0,attempts:0},cards:{},recall:{},lastActive:"",streak:0};
 let tab="course";let quiz=null;let drill=null;let timerH=null;
 const $=id=>document.getElementById(id);
 function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2000)}
@@ -427,12 +436,15 @@ function setTok(v){try{if(v)localStorage.setItem(TOKEN_KEY,v);else localStorage.
 function saveTok(){const v=$("tok").value.trim();setTok(v);toast(v?"Token saved to this browser":"Token cleared");render()}
 function mergeS(a,b){const out=JSON.parse(JSON.stringify(a));if(!b||typeof b!=="object")return out;
 for(const id in (b.tests||{})){const t=out.tests[id]||{best:0,attempts:0};const r=b.tests[id]||{};t.best=Math.max(t.best,r.best||0);t.attempts=Math.max(t.attempts,r.attempts||0);out.tests[id]=t}
+if(!out.recall)out.recall={};
+for(const id in (b.recall||{})){const t=out.recall[id]||{best:0,attempts:0,viol:0};const r=b.recall[id]||{};
+t.best=Math.max(t.best||0,r.best||0);t.attempts=Math.max(t.attempts||0,r.attempts||0);t.viol=Math.max(t.viol||0,r.viol||0);out.recall[id]=t}
 if(b.final){out.final.best=Math.max(out.final.best,b.final.best||0);out.final.attempts=Math.max(out.final.attempts,b.final.attempts||0)}
 out.streak=Math.max(out.streak||0,b.streak||0);
 if((b.lastActive||"")>(out.lastActive||""))out.lastActive=b.lastActive;
 if((b.updated||0)>(out.updated||0))out.updated=b.updated;
 return out}
-function progressSummary(){return M.map(m=>m.name+" — best "+best(m.id)+"% ("+((S.tests[m.id]||{attempts:0}).attempts)+" attempts)").join("; ")+" · final "+S.final.best+"% ("+S.final.attempts+" attempts) · streak "+S.streak+" days · module pass bar "+PASS+"%"}
+function progressSummary(){return M.map(m=>m.name+" — test "+best(m.id)+"%, recall "+recallBest(m.id)+"% ("+((S.tests[m.id]||{attempts:0}).attempts)+" test attempts)").join("; ")+" · final "+S.final.best+"% ("+S.final.attempts+" attempts) · streak "+S.streak+" days · module bar "+PASS+"% on both"}
 function setSyncStat(m){const el=$("syncstat");if(el)el.textContent=m}
 function b64e(s){return btoa(unescape(encodeURIComponent(s)))}
 function b64d(s){return decodeURIComponent(escape(atob(s)))}
@@ -463,7 +475,8 @@ touchStreak();$("loading").style.display="none";$("app").style.display="block";r
 async function save(){S.updated=Date.now();const ok=await rawSet(JSON.stringify(S));if(!ok)toast("Save failed");schedulePush()}
 function touchStreak(){const today=new Date().toISOString().slice(0,10);if(S.lastActive===today)return;const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=(S.lastActive===y)?S.streak+1:1;S.lastActive=today;save()}
 function best(id){return (S.tests[id]&&S.tests[id].best)||0}
-function allPassed(){return M.every(m=>best(m.id)>=PASS)}
+function recallBest(id){return (S.recall&&S.recall[id]&&S.recall[id].best)||0}
+function allPassed(){return M.every(m=>best(m.id)>=PASS&&recallBest(m.id)>=PASS)}
 function ready(){return allPassed()&&S.final.best>=PASS}
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.t;quiz=null;drill=null;if(timerH){clearInterval(timerH);timerH=null}
 document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===b));render()}))
@@ -475,36 +488,69 @@ else if(tab==="final")renderFinal(v);
 else renderSetup(v)}
 function renderCourse(v){let h="";
 h+='<div class="verdict glow">'+(ready()
-?'<div class="big ready">CLAUDE SAYS: BOOK IT</div><div class="note">All modules and the final at 85 or higher. Run both killer.sh sessions in exam week, then schedule.</div>'
-:'<div class="big">NOT READY YET</div><div class="note">Pass every module test at '+PASS+'+ to unlock the final. Streak: '+S.streak+' day'+(S.streak===1?"":"s")+'.</div>')+'</div>';
-for(const m of M){const b=best(m.id);const done=b>=PASS;
+?'<div class="big ready">VERDICT: BOOK IT</div><div class="note">Every module passed on BOTH the test and unaided recall, plus the final at '+PASS+'+. Run both killer.sh sessions in exam week, then schedule.</div>'
+:'<div class="big">NOT READY YET</div><div class="note">Each module needs '+PASS+'+ on the test AND '+PASS+'+ on proctored recall. Streak: '+S.streak+' day'+(S.streak===1?"":"s")+'.</div>')+'</div>';
+for(const m of M){const b=best(m.id);const rb=recallBest(m.id);const done=b>=PASS&&rb>=PASS;
 h+='<div class="mod'+(done?" done":"")+'"><div class="mhead"><div class="mname">'+m.name+'</div><div class="mmeta">'+m.days+' · '+(m.w?m.w+'% of exam':'free points')+'</div></div>';
 h+='<div class="topics">'+m.topics+'</div>';
 h+=(LEARN[m.id]||"");
-h+='<div class="mscore">Best test: <b>'+b+'%</b>'+(done?" · PASSED":" · pass bar "+PASS+"%")+'</div><div class="bar"><div style="width:'+Math.min(100,b)+'%"></div></div>';
-h+='<div class="btnrow"><button class="btn ghost" onclick="startDrill(\''+m.id+'\')">Drill</button><button class="btn" onclick="startQuiz(\''+m.id+'\')">Take test</button></div></div>'}
+h+='<div class="mscore">Test <b>'+b+'%</b> · Recall <b>'+rb+'%</b>'+(done?" · PASSED":" · both need "+PASS+"%")+'</div><div class="bar"><div style="width:'+Math.min(100,Math.min(b,rb))+'%"></div></div>';
+h+='<div class="btnrow"><button class="btn ghost" onclick="startDrill(\''+m.id+'\',\'study\')">Study</button><button class="btn ghost" onclick="startDrill(\''+m.id+'\',\'proctor\')">Proctor</button><button class="btn" onclick="startQuiz(\''+m.id+'\')">Test</button></div></div>'}
 v.innerHTML=h}
-function renderDrill(v){if(!drill){let h='<div class="small" style="margin-bottom:8px">Pick a deck. Tap card to flip. Missed cards come back.</div>';
-for(const m of M){h+='<div class="mod"><div class="mname">'+m.name+'</div><div class="btnrow"><button class="btn" onclick="startDrill(\''+m.id+'\')">Drill '+m.cards.length+' cards</button></div></div>'}
+function renderDrill(v){
+if(!drill){let h='<div class="small" style="margin-bottom:8px">Study teaches a deck. Proctor tests it: you type the answer with nothing revealed first, there is a timer, paste is off, and leaving the page voids the card.</div>';
+for(const m of M){const r=(S.recall&&S.recall[m.id])||{best:0,attempts:0};
+h+='<div class="mod"><div class="mname">'+m.name+'</div><div class="mscore">Best recall <b>'+r.best+'%</b> · '+r.attempts+' attempts</div><div class="btnrow"><button class="btn ghost" onclick="startDrill(\''+m.id+'\',\'study\')">Study '+m.cards.length+'</button><button class="btn" onclick="startDrill(\''+m.id+'\',\'proctor\')">Proctor</button></div></div>'}
 v.innerHTML=h;return}
-const c=drill.q[drill.i];
+
+if(drill.mode==="study"){const c=drill.q[drill.i];
 let h='<div class="glow card" onclick="flip()"><div class="lbl">'+(drill.show?"Answer":"Card "+(drill.i+1)+" of "+drill.q.length+" · tap to flip")+'</div><div class="txt'+(drill.show?" ans":"")+'">'+(drill.show?c[1]:c[0])+'</div></div>';
 if(drill.show)h+='<div class="gotrow"><button class="btn miss" onclick="mark(false)">Missed</button><button class="btn" onclick="mark(true)">Got it</button></div>';
-h+='<div class="small">'+drill.got+' got · '+drill.miss+' missed · <a href="#" onclick="drill=null;render();return false">exit deck</a></div>';
-v.innerHTML=h}
-function startDrill(id){const m=M.find(x=>x.id===id);drill={q:shuffle(m.cards.slice()),i:0,show:false,got:0,miss:0};tab="drill";syncTabs();render()}
+h+='<div class="small">'+drill.got+' got · '+drill.miss+' missed · study mode, does not count</div>';
+h+='<div class="small"><a href="#" onclick="drill=null;render();return false">leave deck</a></div>';
+v.innerHTML=h;return}
+
+if(drill.done){let h='<div class="glow qcard"><div class="qnum"><span>'+drill.name+' · proctored recall</span></div>';
+h+='<div class="qtext">'+drill.pct+'%'+(drill.pct>=PASS?' · PASSED':' · bar is '+PASS+'%')+'</div>';
+h+='<div class="small">'+drill.got+' recalled · '+drill.miss+' missed'+(drill.viol?' · <span class="viol">'+drill.viol+' violation'+(drill.viol===1?'':'s')+'</span>':'')+'</div>';
+for(const w of drill.wrong){h+='<div class="expl">'+w[0]+'</div><div class="expected">expected: '+w[1]+'</div><div class="verdictline bad">you typed: '+esc(w[2])+'</div>'}
+h+='<div class="btnrow"><button class="btn" onclick="drill=null;render()">Done</button></div></div>';
+v.innerHTML=h;return}
+
+const c=drill.q[drill.i];
+let h='<div class="glow qcard"><div class="proctorbar"><span>PROCTORED · '+(drill.i+1)+'/'+drill.q.length+'</span><span class="live" id="ptmr">'+drill.left+'s</span></div>';
+h+='<div class="qtext">'+c[0]+'</div>';
+if(!drill.verdict){h+='<input class="ansbox" id="ansbox" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="type the answer, Enter to submit">';
+h+='<div class="btnrow"><button class="btn" onclick="submitAns(false)">Submit</button></div>'}
+else{const vd=drill.verdict;
+h+='<div class="verdictline '+(vd.ok?"good":"bad")+'">'+(vd.ok?"CORRECT":(vd.voided?"VOIDED · you left the page":(vd.timedOut?"OUT OF TIME":"MISSED")))+'</div>';
+if(!vd.ok)h+='<div class="small">you typed: '+esc(vd.given||"(nothing)")+'</div><div class="expected">'+c[1]+'</div>';
+h+='<div class="btnrow"><button class="btn" onclick="nextCard()">Next</button></div>'}
+h+='<div class="small">'+drill.got+' recalled · '+drill.miss+' missed'+(drill.viol?' · <span class="viol">'+drill.viol+' violations</span>':'')+'</div></div>';
+v.innerHTML=h;
+const el=$("ansbox");
+if(el){el.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();submitAns(false)}};
+el.onpaste=function(e){e.preventDefault();toast("Paste is disabled in proctor mode")};
+el.ondrop=function(e){e.preventDefault()}}}
+function startDrill(id,mode){const m=M.find(x=>x.id===id);
+drill={id:id,name:m.name,mode:mode||"study",q:shuffle(m.cards.slice()),i:0,show:false,got:0,miss:0,left:CARD_SECS,viol:0,wrong:[],verdict:null,done:false};
+tab="drill";syncTabs();if(drill.mode==="proctor")startCardTimer();render();focusAns()}
 function flip(){drill.show=!drill.show;render()}
 function mark(ok){if(ok){drill.got++;drill.q.splice(drill.i,1)}else{drill.miss++;const c=drill.q.splice(drill.i,1)[0];drill.q.push(c)}
 drill.show=false;if(drill.q.length===0){toast("Deck cleared. "+drill.got+" got, "+drill.miss+" missed");drill=null}else{drill.i=drill.i%drill.q.length}
 touchStreak();render()}
-function startQuiz(id){const m=M.find(x=>x.id===id);quiz={mode:"module",id:id,name:m.name,qs:shuffle(m.quiz.slice()),i:0,score:0,answered:-1,timeLeft:0};render()}
+function startQuiz(id){const m=M.find(x=>x.id===id);
+quiz={mode:"module",id:id,name:m.name,qs:shuffle(m.quiz.slice()),i:0,score:0,answered:-1,viol:0,timeLeft:m.quiz.length*60};
+if(timerH){clearInterval(timerH)}
+timerH=setInterval(()=>{quiz.timeLeft--;const el=$("tmr");if(el)el.textContent=fmt(quiz.timeLeft);if(quiz.timeLeft<=0)finishQuiz()},1000);
+render()}
 function startFinal(){if(!allPassed()){toast("Pass all module tests first");return}
 let pool=[];for(const m of M){const take=Math.round(30*m.w/100);pool=pool.concat(shuffle(m.quiz.slice()).slice(0,take))}
 quiz={mode:"final",id:"final",name:"Final Readiness Exam",qs:shuffle(pool).slice(0,30),i:0,score:0,answered:-1,timeLeft:30*60};
 timerH=setInterval(()=>{quiz.timeLeft--;const el=$("tmr");if(el)el.textContent=fmt(quiz.timeLeft);if(quiz.timeLeft<=0)finishQuiz()},1000);render()}
 function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
 function renderQuiz(v){const q=quiz.qs[quiz.i];
-let h='<div class="glow qcard"><div class="qnum"><span>'+quiz.name+' · Q'+(quiz.i+1)+'/'+quiz.qs.length+'</span>'+(quiz.mode==="final"?'<span class="timer" id="tmr">'+fmt(quiz.timeLeft)+'</span>':'')+'</div>';
+let h='<div class="glow qcard"><div class="qnum"><span>'+quiz.name+' · Q'+(quiz.i+1)+'/'+quiz.qs.length+(quiz.viol?' · <span class="viol">'+quiz.viol+' viol</span>':'')+'</span><span class="timer" id="tmr">'+fmt(quiz.timeLeft)+'</span></div>';
 h+='<div class="qtext">'+q[0]+'</div>';
 q[1].forEach((o,idx)=>{let cls="opt";if(quiz.answered>-1){if(idx===q[2])cls+=" right";else if(idx===quiz.answered)cls+=" wrong"}
 h+='<button class="'+cls+'" onclick="answer('+idx+')" '+(quiz.answered>-1?"disabled":"")+'>'+o+'</button>'});
@@ -515,12 +561,12 @@ function answer(idx){if(quiz.answered>-1)return;quiz.answered=idx;if(idx===quiz.
 function nextQ(){if(quiz.i+1<quiz.qs.length){quiz.i++;quiz.answered=-1;render()}else finishQuiz()}
 function abandonQuiz(){if(timerH){clearInterval(timerH);timerH=null}quiz=null;render()}
 function finishQuiz(){if(timerH){clearInterval(timerH);timerH=null}
-const pct=Math.round(100*quiz.score/quiz.qs.length);
+const pct=Math.round(100*quiz.score/quiz.qs.length);const vi=quiz.viol||0;
 if(quiz.mode==="module"){const t=S.tests[quiz.id]||{best:0,attempts:0};t.attempts++;t.best=Math.max(t.best,pct);S.tests[quiz.id]=t}
 else{S.final.attempts++;S.final.best=Math.max(S.final.best,pct)}
 touchStreak();save();
-toast(pct>=PASS?("PASSED at "+pct+"%"):(pct+"%. Bar is "+PASS+"%. Drill and retake"));
-quiz=null;tab= (S.final.best>=PASS&&allPassed())?"course":tab;syncTabs();render()}
+toast((pct>=PASS?("PASSED at "+pct+"%"):(pct+"%. Bar is "+PASS+"%. Drill and retake"))+(vi?" · "+vi+" violation"+(vi===1?"":"s"):""));
+quiz=null;tab=(S.final.best>=PASS&&allPassed())?"course":tab;syncTabs();render()}
 function renderFinal(v){let h='<div class="mod"><div class="mname">Final Readiness Exam</div><div class="topics">30 questions weighted by exam domain, 30 minute timer, instant grading. This gates recall only — the real exam is about 17 hands-on tasks in 120 minutes at a 66 bar with partial credit, so pair it with killercoda and killer.sh labs. Unlocks when all module tests are passed at '+PASS+'%.</div>';
 h+='<div class="mscore">Best: <b>'+S.final.best+'%</b> · attempts '+S.final.attempts+'</div><div class="bar"><div style="width:'+Math.min(100,S.final.best)+'%"></div></div>';
 h+='<div class="btnrow"><button class="btn" onclick="startFinal()" '+(allPassed()?"":"disabled")+'>Start final</button></div>';
@@ -541,6 +587,57 @@ function exportProg(){try{const code=btoa(JSON.stringify(S));if(navigator.clipbo
 function importProg(){const code=window.prompt("Paste progress code:");if(!code)return;try{const inS=JSON.parse(atob(code.trim()));if(!inS||typeof inS!=="object")throw 0;S=mergeS(S,inS);save();render();toast("Progress imported")}catch(e){toast("Bad code")}}
 function syncTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x.dataset.t===tab))}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+/* ---------- proctored recall ---------- */
+const CARD_SECS=45;
+const SYN={deployment:"deploy",deployments:"deploy",deploys:"deploy",pods:"pod",po:"pod",
+service:"svc",services:"svc",namespace:"ns",namespaces:"ns",configmap:"cm",configmaps:"cm",
+secrets:"secret",nodes:"node",daemonset:"ds",daemonsets:"ds",statefulset:"sts",statefulsets:"sts",
+replicaset:"rs",replicasets:"rs",persistentvolumeclaim:"pvc",persistentvolumeclaims:"pvc",
+persistentvolume:"pv",persistentvolumes:"pv",ingress:"ing",ingresses:"ing"};
+function esc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function nrm(t){t=String(t).replace(/\([^)]*\)/g," ");
+t=t.toLowerCase().replace(/[`'"]/g,"").replace(/\s*=\s*/g,"=").replace(/\s+/g," ").trim().replace(/[.,;]+$/,"");
+return t.split(" ").filter(Boolean).map(w=>w.split("/").map(p=>SYN[p]||p).join("/")).join(" ")}
+function dice(a,b){const A=new Set(a.split(" ").filter(Boolean)),B=new Set(b.split(" ").filter(Boolean));
+if(!A.size||!B.size)return 0;let n=0;A.forEach(x=>{if(B.has(x))n++});return 2*n/(A.size+B.size)}
+function isCmd(t){return /kubectl|--|\//.test(t)}
+function judge(given,want){const g=nrm(given),w=nrm(want);
+if(!g)return{ok:false,score:0};
+if(g===w)return{ok:true,score:1};
+const d=dice(g,w);return{ok:d>=(isCmd(want)?0.9:0.62),score:d}}
+
+let pT=null;
+function stopCardTimer(){if(pT){clearInterval(pT);pT=null}}
+function startCardTimer(){stopCardTimer();drill.left=CARD_SECS;
+pT=setInterval(()=>{if(!drill||drill.mode!=="proctor"||drill.verdict||drill.done){return}
+drill.left--;const el=$("ptmr");if(el)el.textContent=drill.left+"s";
+if(drill.left<=0)submitAns(true)},1000)}
+function focusAns(){setTimeout(()=>{const el=$("ansbox");if(el)el.focus()},40)}
+function submitAns(timedOut){if(!drill||drill.verdict||drill.done)return;
+const el=$("ansbox");const given=el?el.value:"";const card=drill.q[drill.i];
+const v=judge(given,card[1]);
+drill.verdict={ok:v.ok,given:given,timedOut:!!timedOut};
+if(v.ok)drill.got++;else{drill.miss++;drill.wrong.push([card[0],card[1],given||"(nothing typed)"])}
+stopCardTimer();render()}
+function nextCard(){if(!drill)return;drill.verdict=null;drill.i++;
+if(drill.i>=drill.q.length){finishProctor();return}
+startCardTimer();render();focusAns()}
+function finishProctor(){stopCardTimer();
+const total=drill.got+drill.miss;const pct=total?Math.round(100*drill.got/total):0;
+if(!S.recall)S.recall={};
+const r=S.recall[drill.id]||{best:0,attempts:0,viol:0};
+r.attempts++;r.best=Math.max(r.best,pct);r.viol=(r.viol||0)+drill.viol;S.recall[drill.id]=r;
+touchStreak();save();drill.done=true;drill.pct=pct;render()}
+function violation(){
+if(drill&&drill.mode==="proctor"&&!drill.verdict&&!drill.done){drill.viol++;
+const card=drill.q[drill.i];drill.miss++;drill.wrong.push([card[0],card[1],"(left the page)"]);
+drill.verdict={ok:false,given:"",voided:true};stopCardTimer();toast("Left the page. Card voided.");render();return}
+if(quiz&&quiz.answered===-1){quiz.viol=(quiz.viol||0)+1;
+quiz.answered=(quiz.qs[quiz.i][2]+1)%quiz.qs[quiz.i][1].length;
+toast("Left the page. Question voided.");render()}}
+document.addEventListener("visibilitychange",function(){if(document.hidden)violation()});
+window.addEventListener("blur",violation);
+
 load();
 </script>
 </body>
